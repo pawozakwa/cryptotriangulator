@@ -1,0 +1,12 @@
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\bin\Debug\netcoreapp2.0\ExchangeProvider.deps.json
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\bin\Debug\netcoreapp2.0\ExchangeProvider.dll
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\obj\Debug\netcoreapp2.0\ExchangeProvider.csprojAssemblyReference.cache
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\obj\Debug\netcoreapp2.0\ExchangeProvider.csproj.CoreCompileInputs.cache
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\obj\Debug\netcoreapp2.0\ExchangeProvider.AssemblyInfoInputs.cache
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\obj\Debug\netcoreapp2.0\ExchangeProvider.AssemblyInfo.cs
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\bin\Debug\netcoreapp2.0\ExchangeProvider.pdb
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\obj\Debug\netcoreapp2.0\ExchangeProvider.dll
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\obj\Debug\netcoreapp2.0\ExchangeProvider.pdb
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\bin\Debug\netcoreapp2.0\Contracts.dll
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\bin\Debug\netcoreapp2.0\Contracts.pdb
+E:\Projects\C#\CryptoTriangulator\ExchangeProvider\obj\Debug\netcoreapp2.0\ExchangeProvider.csproj.CopyComplete

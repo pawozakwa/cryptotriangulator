@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="NetworkCrawler.cs~RFd2900d.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DigitalRuby.ExchangeSharp" Version="0.5.8" />
+    <PackageReference Include="Mendz.Graph" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\ExchangeProvider\ExchangeProvider.csproj" />
+  </ItemGroup>
+
+</Project>
