@@ -44,7 +44,7 @@ namespace TraceMapper
             catch (Exception e)
             {
                 Debug("Exception during parsing ticker currencies:");
-                Console.WriteLine(e.Message);
+                Debug(e.Message);
                 File.AppendAllLines("currencies.txt", new[] { symbols[1] });
                 File.AppendAllLines("currencies.txt", new[] { symbols[0] });
                 return false;
@@ -72,9 +72,7 @@ namespace TraceMapper
 
             return true;
         }
-
-
-
+       
         // TODO
         //public void DrawNetwork()
         //{

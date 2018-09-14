@@ -10,12 +10,7 @@ namespace ExchangeProvider
         public async static void Play()
         {
             var provider = new ExchangeApiProvider();
-
-            //provider.SaveAllCurrenciesToFile("s");
-
-
             
-
             var s1 = "DASH";
             var s1m = "dash";
             var s2 = "BTC";
@@ -72,11 +67,9 @@ namespace ExchangeProvider
 
                     if (ticker1.Bid > ticker2.Ask && ticker1.Ask != 0 && ticker2.Bid != 0)
                     {
-
                         Console.WriteLine($"Ask:{ticker1.Ask}  Bid:{ticker2.Bid}");
                         diffs.Add(ticker1.Bid - ticker2.Ask);
-                    }
-                        
+                    } 
                 }
             }
 
@@ -86,7 +79,6 @@ namespace ExchangeProvider
             {
                 Console.WriteLine(diff);
             }
-            
         }
     }
 }
