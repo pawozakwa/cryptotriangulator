@@ -11,7 +11,7 @@ namespace TraceMapper
         public bool IsArbitrary =>
             Currency == Constats.ArbitraryCurrency;
 
-        decimal ArbitraryValue =>
+        public decimal ArbitraryValue =>
             IsArbitrary ? 1m : Edges.Find(e => e.Head.Currency == Constats.ArbitraryCurrency).ExchangeRate;
         
         public Vertice(Currency currency)

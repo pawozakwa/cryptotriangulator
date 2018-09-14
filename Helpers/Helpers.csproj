@@ -4,9 +4,4 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Constats.cs~RF859246.TMP" />
-    <None Remove="Currency.cs~RFcb5018.TMP" />
-  </ItemGroup>
-
 </Project>

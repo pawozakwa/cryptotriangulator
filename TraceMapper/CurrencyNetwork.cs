@@ -4,6 +4,8 @@ using ExchangeSharp;
 using Contracts;
 using System.IO;
 
+using static Helpers.Helpers;
+
 namespace TraceMapper
 {
     public class CurrencyNetwork
@@ -41,19 +43,33 @@ namespace TraceMapper
             }
             catch (Exception e)
             {
-                Console.WriteLine("Exception during parsing ticker currencies:");
+                Debug("Exception during parsing ticker currencies:");
                 Console.WriteLine(e.Message);
                 File.AppendAllLines("currencies.txt", new[] { symbols[1] });
                 File.AppendAllLines("currencies.txt", new[] { symbols[0] });
                 return false;
             }
+            
+            Debug($"Added edges: {head} <- {ticker.Ask} -> {tail}");
 
             var headVertice = VerticesDictionary.ContainsKey(head) ? VerticesDictionary[head] : new Vertice(head);
-            var tailVertice = VerticesDictionary.ContainsKey(head) ? VerticesDictionary[tail] : new Vertice(tail);
-            
+            var tailVertice = VerticesDictionary.ContainsKey(tail) ? VerticesDictionary[tail] : new Vertice(tail);
+
             var edge = new Edge(headVertice, ticker, exchangeApi);
+            var backwardEdge = new Edge(tailVertice, ticker, exchangeApi, true);
+
+
+            VerticesDictionary[head] = headVertice;
+            VerticesDictionary[tail] = tailVertice;
+
+            if(ticker.Ask == 0) return true;
             
+            tailVertice.Edges.Add(edge);
+            headVertice.Edges.Add(backwardEdge);
+
             Edges.Add(edge);
+            Edges.Add(backwardEdge);
+
             return true;
         }
 
