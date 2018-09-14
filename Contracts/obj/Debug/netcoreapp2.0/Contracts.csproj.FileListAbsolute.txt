@@ -1,9 +1,0 @@
-E:\Projects\C#\CryptoTriangulator\Contracts\bin\Debug\netcoreapp2.0\Contracts.deps.json
-E:\Projects\C#\CryptoTriangulator\Contracts\bin\Debug\netcoreapp2.0\Contracts.dll
-E:\Projects\C#\CryptoTriangulator\Contracts\bin\Debug\netcoreapp2.0\Contracts.pdb
-E:\Projects\C#\CryptoTriangulator\Contracts\obj\Debug\netcoreapp2.0\Contracts.csprojAssemblyReference.cache
-E:\Projects\C#\CryptoTriangulator\Contracts\obj\Debug\netcoreapp2.0\Contracts.csproj.CoreCompileInputs.cache
-E:\Projects\C#\CryptoTriangulator\Contracts\obj\Debug\netcoreapp2.0\Contracts.AssemblyInfoInputs.cache
-E:\Projects\C#\CryptoTriangulator\Contracts\obj\Debug\netcoreapp2.0\Contracts.AssemblyInfo.cs
-E:\Projects\C#\CryptoTriangulator\Contracts\obj\Debug\netcoreapp2.0\Contracts.dll
-E:\Projects\C#\CryptoTriangulator\Contracts\obj\Debug\netcoreapp2.0\Contracts.pdb

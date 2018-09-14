@@ -1,6 +1,0 @@
-E:\Projects\C#\CryptoTriangulator\Extensions\bin\Debug\netcoreapp2.0\Extensions.deps.json
-E:\Projects\C#\CryptoTriangulator\Extensions\bin\Debug\netcoreapp2.0\Extensions.dll
-E:\Projects\C#\CryptoTriangulator\Extensions\obj\Debug\netcoreapp2.0\Extensions.csprojAssemblyReference.cache
-E:\Projects\C#\CryptoTriangulator\Extensions\obj\Debug\netcoreapp2.0\Extensions.csproj.CoreCompileInputs.cache
-E:\Projects\C#\CryptoTriangulator\Extensions\obj\Debug\netcoreapp2.0\Extensions.AssemblyInfoInputs.cache
-E:\Projects\C#\CryptoTriangulator\Extensions\obj\Debug\netcoreapp2.0\Extensions.AssemblyInfo.cs
