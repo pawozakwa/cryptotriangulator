@@ -2,6 +2,7 @@
 using TraceMapper;
 using ExchangeSharp;
 using System;
+using static Helpers.Helpers;
 
 namespace Launcher
 {
@@ -18,17 +19,34 @@ namespace Launcher
             };
 
             var crawler = new NetworkCrawler(exchangeAPIs);
-
             var accountBalance = 1m;
 
-            for (int i = 0; i < 10; i++)
-            {
-                crawler.InitializeNetwork().GetAwaiter().GetResult();
+            crawler.InitializeNetwork().GetAwaiter().GetResult();
 
-                accountBalance = crawler.IterativeFindTraceWithProfit(3, accountBalance);
-                crawler.ShowBestFoundedTrace();
+            PrintInColor("How deep you want to search?", ConsoleColor.White);
+            while (true)
+            {
+                try {
+                    crawler.SearchDepth = int.Parse(Console.ReadLine());
+                    break;
+                }
+                catch (Exception e) { PrintInColor(e.ToString(), ConsoleColor.Red); }
             }
 
+            PrintInColor("Commisions?", ConsoleColor.White);
+            while (true)
+            {
+                try
+                {
+                    crawler.Commision = decimal.Parse(Console.ReadLine());
+                    break;
+                }
+                catch (Exception e) { PrintInColor(e.ToString(), ConsoleColor.Red); }
+            }
+
+            accountBalance = crawler.IterativeFindTraceWithProfit(12, accountBalance);
+            crawler.ShowBestFoundedTrace();
+            
             Console.ReadLine();
         }
     }

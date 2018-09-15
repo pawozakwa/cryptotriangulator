@@ -23,7 +23,7 @@ namespace TraceMapper
         public bool AddEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi)
         {
             Currency head, tail;
-            var separator = exchangeApi.SymbolSeparator;            
+            var separator = exchangeApi.SymbolSeparator;
             string[] symbols = new string[2];
 
             if (separator == "")
@@ -49,21 +49,16 @@ namespace TraceMapper
                 File.AppendAllLines("currencies.txt", new[] { symbols[0] });
                 return false;
             }
-            
             Debug($"Added edges: {head} <- {ticker.Ask} -> {tail}");
 
-            var headVertice = VerticesDictionary.ContainsKey(head) ? VerticesDictionary[head] : new Vertice(head);
-            var tailVertice = VerticesDictionary.ContainsKey(tail) ? VerticesDictionary[tail] : new Vertice(tail);
+            Vertice headVertice, tailVertice;
+            AddVerticesIfNew(head, tail, out headVertice, out tailVertice);
 
             var edge = new Edge(headVertice, ticker, exchangeApi);
             var backwardEdge = new Edge(tailVertice, ticker, exchangeApi, true);
 
+            if (ticker.Ask == 0) return true;
 
-            VerticesDictionary[head] = headVertice;
-            VerticesDictionary[tail] = tailVertice;
-
-            if(ticker.Ask == 0) return true;
-            
             tailVertice.Edges.Add(edge);
             headVertice.Edges.Add(backwardEdge);
 
@@ -72,7 +67,15 @@ namespace TraceMapper
 
             return true;
         }
-       
+
+        private void AddVerticesIfNew(Currency head, Currency tail, out Vertice headVertice, out Vertice tailVertice)
+        {
+            headVertice = VerticesDictionary.ContainsKey(head) ? VerticesDictionary[head] : new Vertice(head);
+            tailVertice = VerticesDictionary.ContainsKey(tail) ? VerticesDictionary[tail] : new Vertice(tail);
+            VerticesDictionary[head] = headVertice;
+            VerticesDictionary[tail] = tailVertice;
+        }
+
         // TODO
         //public void DrawNetwork()
         //{

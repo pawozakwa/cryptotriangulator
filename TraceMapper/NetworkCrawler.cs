@@ -5,10 +5,15 @@ using ExchangeSharp;
 using Contracts;
 using System.Collections.Generic;
 
+using static Helpers.Helpers;
+
 namespace TraceMapper
 {
     public class NetworkCrawler
     {
+
+        #region Network initialization
+
         private CurrencyNetwork _currencyNetwork;
         private ExchangeAPI[] _exchangeApis;
 
@@ -29,7 +34,7 @@ namespace TraceMapper
                 var tickersFromExchange = await exchangeApi.GetTickersAsync();
                 stopWatch.Stop();
                 Console.WriteLine($"   <= Done!");
-                Console.Write("Feeding actual tickers...");
+                Console.Write("Feeding Network with actual tickers...");
                 stopWatch.Restart();
                 foreach (var tickerKV in tickersFromExchange)
                 {
@@ -38,6 +43,8 @@ namespace TraceMapper
                 Console.WriteLine($"   <= Done!");
             }
         }
+
+        #endregion
 
         #region Iterative aproach
 
@@ -60,26 +67,51 @@ namespace TraceMapper
 
         public decimal BestTraceProfit { private set; get; }
 
-        private List<Edge> _bestTrace;
         private int _searchDepth = 5;
+        public int SearchDepth
+        {
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentException("Value has to bed over 0");
+                else _searchDepth = value;
+            }
+            get => _searchDepth;
+        }
 
-        private readonly decimal commision = 0.1m / 100m;
+        private decimal _commision = 0.1m / 100m;
+        public decimal Commision
+        {
+            set
+            {
+                if (value < 0 || value > 1)
+                    throw new ArgumentException("0 < commision < 1");
+                else _commision = value;
+            }
+            get => _commision;
+        }
+
+        private List<Edge> _bestTrace;
 
         public void ShowBestFoundedTrace()
         {
             if (_bestTrace == null) throw new Exception("There is no best trace");
 
+            if (BestTraceProfit < 1)
+            {
+                Helpers.Helpers.PrintInColor("Founded chain is not profitable yet...", ConsoleColor.DarkGray);
+            }
+
             var previousConsoleColor = Console.ForegroundColor;
 
-            var result = @"==========BEST FOUNDED TRACE==========
-                            Profit: {BestTraceProfit}
-                            {Constats.ArbitraryCurrency}";
-            var resultFoot = @"======================================
-                                ";
+            var result = $"==========BEST FOUNDED TRACE==========" +
+                          Environment.NewLine + $"Result after: {BestTraceProfit}";
+            var resultFoot = @"======================================" + Environment.NewLine;
             Helpers.Helpers.PrintInColor(result, ConsoleColor.Red);
 
+            Console.Write($">{Constats.ArbitraryCurrency} {Environment.NewLine}");
             foreach (var edge in _bestTrace)
-                Console.Write($" => {edge.Head.Currency}");
+                Console.Write($">{edge.Head.Currency} {Environment.NewLine}");
 
             Helpers.Helpers.PrintInColor(resultFoot, ConsoleColor.Red);
         }
@@ -118,16 +150,20 @@ namespace TraceMapper
 
         private void SimulateCommision(ref decimal currentValue)
         {
-            currentValue -= currentValue * commision;
+            currentValue -= currentValue * _commision;
         }
 
         private static decimal SimulateExchange(ref decimal currentValue, Edge currentEdge) => currentValue /= currentEdge.ExchangeRate;
 
         #endregion
 
+        #region Bellman-Ford aproach
+
         private void BellmanFordFindtraceWithProfit()
         {
             throw new NotImplementedException();
         }
+
+        #endregion
     }
 }

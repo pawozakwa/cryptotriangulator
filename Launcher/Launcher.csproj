@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExchangeProvider\ExchangeProvider.csproj" />
+    <ProjectReference Include="..\Helpers\Helpers.csproj" />
     <ProjectReference Include="..\TraceMapper\TraceMapper.csproj" />
   </ItemGroup>
 
