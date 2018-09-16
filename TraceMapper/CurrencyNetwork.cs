@@ -35,13 +35,12 @@ namespace TraceMapper
             {
                 symbols = tickerName.Split(separator);
             }
-
-
+            
             head = ParseSymbolToEnum(symbols[0]);
             tail = ParseSymbolToEnum(symbols[1]);
 
-            if (head == null || tail == null) return false;
-
+            if (head == null || tail == null)
+                return false;
 
             Debug($"Added edges: {head} <- {ticker.Ask} -> {tail}");
 
@@ -53,6 +52,7 @@ namespace TraceMapper
                 tailVertice.Edges.Add(edge);
                 Edges.Add(edge);
             }
+            catch (ArgumentException ae) { Debug("Ticker is broken, exchange rate equal zero!"); }
             catch (Exception e) { Debug(e.ToString()); }
 
             try
@@ -61,6 +61,7 @@ namespace TraceMapper
                 headVertice.Edges.Add(backwardEdge);
                 Edges.Add(backwardEdge);
             }
+            catch (ArgumentException ae) { Debug("Ticker is broken, exchange rate equal zero!"); }
             catch (Exception e) { Debug(e.ToString()); }
 
             return true;
@@ -90,11 +91,5 @@ namespace TraceMapper
             tailVertice = VerticesDictionary.ContainsKey(t) ? VerticesDictionary[t] : new Vertice(t);
             VerticesDictionary[t] = tailVertice;
         }
-
-        // TODO
-        //public void DrawNetwork()
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

@@ -6,6 +6,7 @@ using Contracts;
 using System.Collections.Generic;
 
 using static Helpers.Helpers;
+using static Helpers.SoundsProvider;
 
 namespace TraceMapper
 {
@@ -18,12 +19,12 @@ namespace TraceMapper
 
         public NetworkCrawler(ExchangeAPI exchangeApi)
         {
-            _currencyNetwork = new CurrencyNetwork();
             _exchangeApi = exchangeApi;
         }
 
         public async Task InitializeNetwork()
         {
+            _currencyNetwork = new CurrencyNetwork();
             var stopWatch = new Stopwatch();
 
             Console.Write("Downloading actual tickers...");
@@ -60,11 +61,11 @@ namespace TraceMapper
             _bestTrace = null;
             BestTraceProfit = 0;
 
-            foreach (var e in enterVertice.Edges)
-            {
-                var singleList = new List<Edge> { e };
-                FollowTransaction(singleList, arbitraryCurrencyAmount, true);
-            }
+            Parallel.ForEach(enterVertice.Edges, (e) =>
+                {
+                    var singleList = new List<Edge> { e };
+                    FollowTransaction(singleList, arbitraryCurrencyAmount);
+                });
 
             return BestTraceProfit;
         }
@@ -108,6 +109,13 @@ namespace TraceMapper
                 {
                     PrintInColor("Founded chain is not profitable yet...", ConsoleColor.DarkGray);
                 }
+                else
+                {
+                    PlayWinnerMusic();
+                    PrintInColor( "$$$ Profitable path founded! $$$", ConsoleColor.Green);
+                    double rewardPercentage = ((double)BestTraceProfit - 1) * 100.0;
+                    PrintInColor($"$$$ Profit size: {string.Format("{0:0.00}", rewardPercentage)}%       $$$", ConsoleColor.DarkGreen);
+                }
 
                 var previousConsoleColor = Console.ForegroundColor;
 
@@ -123,9 +131,9 @@ namespace TraceMapper
 
             var resultFoot = @"======================================" + Environment.NewLine;
             PrintInColor(resultFoot, ConsoleColor.Red);
-        }        
+        }
 
-        private void FollowTransaction(List<Edge> edges, decimal currentValue, bool parallel = false, int currentDepth = 0)
+        private void FollowTransaction(List<Edge> edges, decimal currentValue, int currentDepth = 0)
         {
             currentDepth++;
             if (currentDepth >= _searchDepth)
@@ -151,24 +159,15 @@ namespace TraceMapper
                     BestTraceProfit = arbitraryValue;
 
                     PrintInColor($"$$$ New best trace founded! [{BestTraceProfit}] $$$", ConsoleColor.Yellow);
-                    foreach (var edge in _bestTrace)
-                        Console.Write($" > {edge.ExchangeRate}");
-                    Console.WriteLine();
                 }
             }
 
-            if(parallel)
-                Parallel.ForEach(nextVertice.Edges, (e) =>
-                {
-                    var extendedEdges = new List<Edge>(edges) { e };
-                    FollowTransaction(extendedEdges, currentValue, false, currentDepth);
-                });
-            else
-                foreach (var e in nextVertice.Edges)
-                {
-                    var extendedEdges = new List<Edge>(edges) { e };
-                    FollowTransaction(extendedEdges, currentValue, false, currentDepth);
-                }
+            
+            foreach (var e in nextVertice.Edges)
+            {
+                var extendedEdges = new List<Edge>(edges) { e };
+                FollowTransaction(extendedEdges, currentValue, currentDepth);
+            }
         }
 
         private void SimulateCommision(ref decimal currentValue)

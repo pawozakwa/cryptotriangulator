@@ -1,4 +1,5 @@
-﻿using ExchangeSharp;
+﻿using System;
+using ExchangeSharp;
 
 namespace TraceMapper
 {
@@ -17,6 +18,13 @@ namespace TraceMapper
             Ticker = ticker;
             ExchangeApi = exchangeApi;
             ExchangeRate = Inverted ? 1 / ticker.Bid : ticker.Ask;
+            VerifyCorrectness();
+        }
+
+        private void VerifyCorrectness()
+        {
+            if (ExchangeRate == 0)
+                throw new ArgumentException();
         }
     }
 }
