@@ -14,6 +14,7 @@ namespace Launcher
     {
         static void Main(string[] args)
         {
+            CustomizeConsole();
             Demo.ShowLogo();
 
             var apiProvider = new ExchangeApiProvider();
@@ -28,6 +29,7 @@ namespace Launcher
             for (int i = 0; i < simulationLenght; i++)
             {
                 Thread.Sleep(3000); // Avoid ticker get rejection
+                Console.WriteLine("+--------------------------------------------------------------------------------------------------+");
 
                 crawler.Commision = fee;
                 crawler.InitializeNetwork().GetAwaiter().GetResult();
@@ -37,11 +39,18 @@ namespace Launcher
 
                 stopWatch.Restart();
                 accountBalance = crawler.IterativeFindTraceWithProfit(depth, accountBalance);
-                PrintInColor($"Searching to {i}, takes {stopWatch.Elapsed.TotalSeconds} seconds", ConsoleColor.Cyan);
+                PrintInColor($"Searching took {stopWatch.Elapsed.TotalSeconds} seconds", ConsoleColor.Cyan);
                 crawler.ShowBestFoundedTrace();
+
+                Console.WriteLine();Console.WriteLine();
             }
             
             Console.ReadLine();
+        }
+
+        private static void CustomizeConsole()
+        {
+            Console.Title = "~Crypto Triangulator~";
         }
 
         //private Exchange AskUserForExchange()

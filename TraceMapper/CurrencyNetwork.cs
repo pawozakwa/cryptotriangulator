@@ -35,36 +35,48 @@ namespace TraceMapper
             {
                 symbols = tickerName.Split(separator);
             }
-            
+
             head = ParseSymbolToEnum(symbols[0]);
             tail = ParseSymbolToEnum(symbols[1]);
 
             if (head == null || tail == null)
                 return false;
 
-            Debug($"Added edges: {head} <- {ticker.Ask} -> {tail}");
-
             AddVerticesIfNew(head, tail, out Vertice headVertice, out Vertice tailVertice);
+            TryToAddForwardEdge(tickerName, ticker, exchangeApi, head, tail, headVertice, tailVertice);
+            TryToAddBackwardEdge(tickerName, ticker, exchangeApi, head, tail, headVertice, tailVertice);
 
-            try
-            {
-                var edge = new Edge(tickerName, headVertice, ticker, exchangeApi);
-                tailVertice.Edges.Add(edge);
-                Edges.Add(edge);
-            }
-            catch (ArgumentException ae) { Debug("Ticker is broken, exchange rate equal zero!"); }
-            catch (Exception e) { Debug(e.ToString()); }
+            return true;
+        }
 
+        private void TryToAddBackwardEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi, Currency? head, Currency? tail, Vertice headVertice, Vertice tailVertice)
+        {
             try
             {
                 var backwardEdge = new Edge(tickerName, tailVertice, ticker, exchangeApi, true);
                 headVertice.Edges.Add(backwardEdge);
                 Edges.Add(backwardEdge);
+                PrintDebugForTicker(tickerName, ticker, head, tail, backwardEdge);
             }
-            catch (ArgumentException ae) { Debug("Ticker is broken, exchange rate equal zero!"); }
-            catch (Exception e) { Debug(e.ToString()); }
+            catch (Exception) { Debug("Ticker is broken, exchange rate equal zero!"); }
+        }
 
-            return true;
+        private void TryToAddForwardEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi, Currency? head, Currency? tail, Vertice headVertice, Vertice tailVertice)
+        {
+            try
+            {
+                var edge = new Edge(tickerName, headVertice, ticker, exchangeApi);
+                tailVertice.Edges.Add(edge);
+                Edges.Add(edge);
+                PrintDebugForTicker(tickerName, ticker,  tail, head, edge);
+            }
+            catch (Exception) { Debug("Ticker is broken, exchange rate equal zero!"); }
+        }
+
+        private static void PrintDebugForTicker(string tickerName, ExchangeTicker ticker, Currency? head, Currency? tail, Edge backwardEdge)
+        {
+            Debug($"Ticker:{tickerName} ask = {ticker.Ask} bid = {ticker.Bid} ");
+            Debug($"Added edge: {tail} costs {backwardEdge.ExchangeRate} {head}");
         }
 
         private static Currency? ParseSymbolToEnum(string symbol)

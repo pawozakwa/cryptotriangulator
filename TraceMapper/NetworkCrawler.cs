@@ -61,11 +61,18 @@ namespace TraceMapper
             _bestTrace = null;
             BestTraceProfit = 0;
 
+            PrintInColor("Crawling through the network ...", ConsoleColor.DarkGray);
+
+            enterVertice.Edges.ForEach(e => Console.Write("_"));
+            Console.WriteLine();
+
             Parallel.ForEach(enterVertice.Edges, (e) =>
                 {
                     var singleList = new List<Edge> { e };
                     FollowTransaction(singleList, arbitraryCurrencyAmount);
+                    Console.Write("*");
                 });
+            Console.WriteLine();
 
             return BestTraceProfit;
         }
@@ -102,12 +109,11 @@ namespace TraceMapper
         {
             lock (this)
             {
-
                 if (_bestTrace == null) throw new Exception("There is no best trace");
 
                 if (BestTraceProfit < 1)
                 {
-                    PrintInColor("Founded chain is not profitable yet...", ConsoleColor.DarkGray);
+                    PrintInColor($"Founded chain is not profitable yet, only {BestTraceProfit} left ...", ConsoleColor.DarkGray);
                 }
                 else
                 {
@@ -115,22 +121,19 @@ namespace TraceMapper
                     PrintInColor( "$$$ Profitable path founded! $$$", ConsoleColor.Green);
                     double rewardPercentage = ((double)BestTraceProfit - 1) * 100.0;
                     PrintInColor($"$$$ Profit size: {string.Format("{0:0.00}", rewardPercentage)}%       $$$", ConsoleColor.DarkGreen);
+
+                    var previousConsoleColor = Console.ForegroundColor;
+                    var result = $"==========BEST FOUNDED TRACE==========" +
+                                  Environment.NewLine + $"Result after: {BestTraceProfit}";
+                    PrintInColor(result, ConsoleColor.Magenta);
+                    Console.Write($"> {Constats.ArbitraryCurrency}");
+                    foreach (var edge in _bestTrace)
+                        Console.Write($" > {edge.Head.Currency}");
+                    Console.Write($" > {Constats.ArbitraryCurrency} {Environment.NewLine}");
+                    var resultFoot = @"======================================" + Environment.NewLine;
+                    PrintInColor(resultFoot, ConsoleColor.Magenta);
                 }
-
-                var previousConsoleColor = Console.ForegroundColor;
-
-                var result = $"==========BEST FOUNDED TRACE==========" +
-                              Environment.NewLine + $"Result after: {BestTraceProfit}";
-                PrintInColor(result, ConsoleColor.Red);
-
-                Console.Write($">{Constats.ArbitraryCurrency} {Environment.NewLine}");
-                foreach (var edge in _bestTrace)
-                    Console.Write($">{edge.Head.Currency} {Environment.NewLine}");
-                Console.Write($">{Constats.ArbitraryCurrency} {Environment.NewLine}");
             }
-
-            var resultFoot = @"======================================" + Environment.NewLine;
-            PrintInColor(resultFoot, ConsoleColor.Red);
         }
 
         private void FollowTransaction(List<Edge> edges, decimal currentValue, int currentDepth = 0)
@@ -152,22 +155,23 @@ namespace TraceMapper
             var arbitraryValue = currentValue / nextVertArbitraryValue;
 
             lock (this)
-            {
-                if (arbitraryValue > BestTraceProfit)
-                {
-                    _bestTrace = edges;
-                    BestTraceProfit = arbitraryValue;
+                CheckForNewBestProfit(edges, arbitraryValue);
 
-                    PrintInColor($"$$$ New best trace founded! [{BestTraceProfit}] $$$", ConsoleColor.Yellow);
-                }
-            }
-
-            
             foreach (var e in nextVertice.Edges)
             {
+                //if (edges.Contains(e))
+                //    continue;
+
                 var extendedEdges = new List<Edge>(edges) { e };
                 FollowTransaction(extendedEdges, currentValue, currentDepth);
             }
+        }
+
+        private void CheckForNewBestProfit(List<Edge> edges, decimal arbitraryValue)
+        {
+            if (arbitraryValue < BestTraceProfit) return;            
+            _bestTrace = edges;
+            BestTraceProfit = arbitraryValue;
         }
 
         private void SimulateCommision(ref decimal currentValue)
