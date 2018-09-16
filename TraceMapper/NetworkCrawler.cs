@@ -11,37 +11,41 @@ namespace TraceMapper
 {
     public class NetworkCrawler
     {
-
         #region Network initialization
 
         private CurrencyNetwork _currencyNetwork;
-        private ExchangeAPI[] _exchangeApis;
+        private ExchangeAPI _exchangeApi;
 
-        public NetworkCrawler(ExchangeAPI[] exchangeApis)
+        public NetworkCrawler(ExchangeAPI exchangeApi)
         {
             _currencyNetwork = new CurrencyNetwork();
-            _exchangeApis = exchangeApis;
+            _exchangeApi = exchangeApi;
         }
 
         public async Task InitializeNetwork()
         {
-            foreach (var exchangeApi in _exchangeApis)
-            {
-                var stopWatch = new Stopwatch();
+            var stopWatch = new Stopwatch();
 
-                Console.Write("Downloading actual tickers...");
-                stopWatch.Start();
-                var tickersFromExchange = await exchangeApi.GetTickersAsync();
-                stopWatch.Stop();
-                Console.WriteLine($"   <= Done!");
-                Console.Write("Feeding Network with actual tickers...");
-                stopWatch.Restart();
-                foreach (var tickerKV in tickersFromExchange)
+            Console.Write("Downloading actual tickers...");
+            stopWatch.Start();
+            var tickersFromExchange = await _exchangeApi.GetTickersAsync();
+            stopWatch.Stop();
+            Console.WriteLine($"   <= Done!");
+            Console.Write("Feeding Network with actual tickers...");
+            stopWatch.Restart();
+            foreach (var tickerKV in tickersFromExchange)
+            {
+                try
                 {
-                    _currencyNetwork.AddEdge(tickerKV.Key, tickerKV.Value, exchangeApi);
+                    _currencyNetwork.AddEdge(tickerKV.Key, tickerKV.Value, _exchangeApi);
                 }
-                Console.WriteLine($"   <= Done!");
+                catch (Exception e)
+                {
+                    PrintInColor(e.ToString(), ConsoleColor.Red);
+                    throw;
+                }
             }
+            Console.WriteLine($"   <= Done!");
         }
 
         #endregion
@@ -59,7 +63,7 @@ namespace TraceMapper
             foreach (var e in enterVertice.Edges)
             {
                 var singleList = new List<Edge> { e };
-                FollowTransaction(singleList, arbitraryCurrencyAmount);
+                FollowTransaction(singleList, arbitraryCurrencyAmount, true);
             }
 
             return BestTraceProfit;
@@ -95,28 +99,33 @@ namespace TraceMapper
 
         public void ShowBestFoundedTrace()
         {
-            if (_bestTrace == null) throw new Exception("There is no best trace");
-
-            if (BestTraceProfit < 1)
+            lock (this)
             {
-                Helpers.Helpers.PrintInColor("Founded chain is not profitable yet...", ConsoleColor.DarkGray);
+
+                if (_bestTrace == null) throw new Exception("There is no best trace");
+
+                if (BestTraceProfit < 1)
+                {
+                    PrintInColor("Founded chain is not profitable yet...", ConsoleColor.DarkGray);
+                }
+
+                var previousConsoleColor = Console.ForegroundColor;
+
+                var result = $"==========BEST FOUNDED TRACE==========" +
+                              Environment.NewLine + $"Result after: {BestTraceProfit}";
+                PrintInColor(result, ConsoleColor.Red);
+
+                Console.Write($">{Constats.ArbitraryCurrency} {Environment.NewLine}");
+                foreach (var edge in _bestTrace)
+                    Console.Write($">{edge.Head.Currency} {Environment.NewLine}");
+                Console.Write($">{Constats.ArbitraryCurrency} {Environment.NewLine}");
             }
 
-            var previousConsoleColor = Console.ForegroundColor;
-
-            var result = $"==========BEST FOUNDED TRACE==========" +
-                          Environment.NewLine + $"Result after: {BestTraceProfit}";
             var resultFoot = @"======================================" + Environment.NewLine;
-            Helpers.Helpers.PrintInColor(result, ConsoleColor.Red);
+            PrintInColor(resultFoot, ConsoleColor.Red);
+        }        
 
-            Console.Write($">{Constats.ArbitraryCurrency} {Environment.NewLine}");
-            foreach (var edge in _bestTrace)
-                Console.Write($">{edge.Head.Currency} {Environment.NewLine}");
-
-            Helpers.Helpers.PrintInColor(resultFoot, ConsoleColor.Red);
-        }
-
-        private void FollowTransaction(List<Edge> edges, decimal currentValue, int currentDepth = 0)
+        private void FollowTransaction(List<Edge> edges, decimal currentValue, bool parallel = false, int currentDepth = 0)
         {
             currentDepth++;
             if (currentDepth >= _searchDepth)
@@ -129,23 +138,37 @@ namespace TraceMapper
             SimulateCommision(ref currentValue);
 
             var nextVertArbitraryValue = nextVertice.ArbitraryValue;
-            if (nextVertArbitraryValue == 0) return;
+            if (nextVertArbitraryValue == 0)
+                return;
 
             var arbitraryValue = currentValue / nextVertArbitraryValue;
 
-            if (arbitraryValue > BestTraceProfit)
+            lock (this)
             {
-                _bestTrace = edges;
-                BestTraceProfit = arbitraryValue;
-                Helpers.Helpers.PrintInColor($"$$$ New best trace founded! [{BestTraceProfit}] $$$", ConsoleColor.Yellow);
+                if (arbitraryValue > BestTraceProfit)
+                {
+                    _bestTrace = edges;
+                    BestTraceProfit = arbitraryValue;
+
+                    PrintInColor($"$$$ New best trace founded! [{BestTraceProfit}] $$$", ConsoleColor.Yellow);
+                    foreach (var edge in _bestTrace)
+                        Console.Write($" > {edge.ExchangeRate}");
+                    Console.WriteLine();
+                }
             }
 
-            foreach (var e in nextVertice.Edges)
-            {
-                var extendedEdges = new List<Edge>(edges);
-                extendedEdges.Add(e);
-                FollowTransaction(extendedEdges, currentValue, currentDepth);
-            }
+            if(parallel)
+                Parallel.ForEach(nextVertice.Edges, (e) =>
+                {
+                    var extendedEdges = new List<Edge>(edges) { e };
+                    FollowTransaction(extendedEdges, currentValue, false, currentDepth);
+                });
+            else
+                foreach (var e in nextVertice.Edges)
+                {
+                    var extendedEdges = new List<Edge>(edges) { e };
+                    FollowTransaction(extendedEdges, currentValue, false, currentDepth);
+                }
         }
 
         private void SimulateCommision(ref decimal currentValue)

@@ -18,11 +18,11 @@ namespace TraceMapper
             Edges = new List<Edge>();
             VerticesDictionary = new Dictionary<Currency, Vertice>();
         }
-        
+
         /// <returns>True if currency added or already exist in the graph, otherwise false</returns>
         public bool AddEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi)
         {
-            Currency head, tail;
+            Currency? head, tail;
             var separator = exchangeApi.SymbolSeparator;
             string[] symbols = new string[2];
 
@@ -36,44 +36,59 @@ namespace TraceMapper
                 symbols = tickerName.Split(separator);
             }
 
-            try
-            {
-                head = (Currency)Enum.Parse(typeof(Currency), symbols[0]);
-                tail = (Currency)Enum.Parse(typeof(Currency), symbols[1]);
-            }
-            catch (Exception e)
-            {
-                Debug("Exception during parsing ticker currencies:");
-                Debug(e.Message);
-                File.AppendAllLines("currencies.txt", new[] { symbols[1] });
-                File.AppendAllLines("currencies.txt", new[] { symbols[0] });
-                return false;
-            }
+
+            head = ParseSymbolToEnum(symbols[0]);
+            tail = ParseSymbolToEnum(symbols[1]);
+
+            if (head == null || tail == null) return false;
+
+
             Debug($"Added edges: {head} <- {ticker.Ask} -> {tail}");
 
-            Vertice headVertice, tailVertice;
-            AddVerticesIfNew(head, tail, out headVertice, out tailVertice);
+            AddVerticesIfNew(head, tail, out Vertice headVertice, out Vertice tailVertice);
 
-            var edge = new Edge(headVertice, ticker, exchangeApi);
-            var backwardEdge = new Edge(tailVertice, ticker, exchangeApi, true);
+            try
+            {
+                var edge = new Edge(tickerName, headVertice, ticker, exchangeApi);
+                tailVertice.Edges.Add(edge);
+                Edges.Add(edge);
+            }
+            catch (Exception e) { Debug(e.ToString()); }
 
-            if (ticker.Ask == 0) return true;
-
-            tailVertice.Edges.Add(edge);
-            headVertice.Edges.Add(backwardEdge);
-
-            Edges.Add(edge);
-            Edges.Add(backwardEdge);
+            try
+            {
+                var backwardEdge = new Edge(tickerName, tailVertice, ticker, exchangeApi, true);
+                headVertice.Edges.Add(backwardEdge);
+                Edges.Add(backwardEdge);
+            }
+            catch (Exception e) { Debug(e.ToString()); }
 
             return true;
         }
 
-        private void AddVerticesIfNew(Currency head, Currency tail, out Vertice headVertice, out Vertice tailVertice)
+        private static Currency? ParseSymbolToEnum(string symbol)
         {
-            headVertice = VerticesDictionary.ContainsKey(head) ? VerticesDictionary[head] : new Vertice(head);
-            tailVertice = VerticesDictionary.ContainsKey(tail) ? VerticesDictionary[tail] : new Vertice(tail);
-            VerticesDictionary[head] = headVertice;
-            VerticesDictionary[tail] = tailVertice;
+            try
+            {
+                return (Currency)Enum.Parse(typeof(Currency), symbol);
+            }
+            catch (Exception e)
+            {
+                Debug(e.Message);
+                File.AppendAllLines("currencies.txt", new[] { symbol });
+                return null;
+            }
+        }
+
+        private void AddVerticesIfNew(Currency? head, Currency? tail, out Vertice headVertice, out Vertice tailVertice)
+        {
+            Currency h = (Currency)head;
+            headVertice = VerticesDictionary.ContainsKey(h) ? VerticesDictionary[h] : new Vertice(h);
+            VerticesDictionary[h] = headVertice;
+
+            Currency t = (Currency)tail;
+            tailVertice = VerticesDictionary.ContainsKey(t) ? VerticesDictionary[t] : new Vertice(t);
+            VerticesDictionary[t] = tailVertice;
         }
 
         // TODO

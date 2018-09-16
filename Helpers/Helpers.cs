@@ -17,7 +17,7 @@ namespace Helpers
         {
     #if DEBUG
             var oldColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(text);
             Console.ForegroundColor = oldColor;
     #endif
