@@ -21,9 +21,6 @@ namespace Launcher
             var crawler = new NetworkCrawler(apiProvider.GetApi(Exchange.Binance));
             var accountBalance = 1m;
 
-            var depth = 10; //AskUserForSearchDepth();
-            var fee = 0.001m; //AskUserForCommisions();
-
             var simulationLenght = 2000;
             
             for (int i = 0; i < simulationLenght; i++)
@@ -31,14 +28,13 @@ namespace Launcher
                 Thread.Sleep(3000); // Avoid ticker get rejection
                 Console.WriteLine("+--------------------------------------------------------------------------------------------------+");
 
-                crawler.Commision = fee;
                 crawler.InitializeNetwork().GetAwaiter().GetResult();
                 //accountBalance = crawler.IterativeFindTraceWithProfit(depth, accountBalance);
 
                 Stopwatch stopWatch = new Stopwatch();
 
                 stopWatch.Restart();
-                accountBalance = crawler.IterativeFindTraceWithProfit(depth, accountBalance);
+                accountBalance = crawler.FindBestChainOfTransactions(accountBalance);
                 PrintInColor($"Searching took {stopWatch.Elapsed.TotalSeconds} seconds", ConsoleColor.Cyan);
                 crawler.ShowBestFoundedTrace();
 

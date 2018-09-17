@@ -9,10 +9,13 @@ namespace TraceMapper
         public readonly Currency Currency;
         public List<Edge> Edges;
         public bool IsArbitrary =>
-            Currency == Constats.ArbitraryCurrency;
+            Currency == Constants.ArbitraryCurrency;
+
+        public bool IsEnter =>
+            Currency == Constants.EnterCurrency;
 
         public decimal ArbitraryValue =>
-            IsArbitrary ? 1m : Edges.Find(e => e.Head.Currency == Constats.ArbitraryCurrency).ExchangeRate;
+            IsArbitrary ? 1m : Edges.Find(e => e.Head.Currency == Constants.ArbitraryCurrency).ExchangeRate;
         
         public Vertice(Currency currency)
         {

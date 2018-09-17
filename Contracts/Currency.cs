@@ -7,6 +7,7 @@ namespace Contracts
     public enum Currency
     {
         BTC,
+        USDT,
         LTC,
         ETC,
         ZEC,

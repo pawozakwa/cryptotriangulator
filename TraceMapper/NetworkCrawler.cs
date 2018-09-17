@@ -24,7 +24,10 @@ namespace TraceMapper
 
         public async Task InitializeNetwork()
         {
+            LoadContants();
+
             _currencyNetwork = new CurrencyNetwork();
+            _bestChainToVertice = new Dictionary<Currency, decimal>();
             var stopWatch = new Stopwatch();
 
             Console.Write("Downloading actual tickers...");
@@ -49,37 +52,79 @@ namespace TraceMapper
             Console.WriteLine($"   <= Done!");
         }
 
+        private void LoadContants()
+        {
+            _commision = Constants.Commision;
+            _searchDepth = Constants.SearchDepth;
+        }
+
         #endregion
 
         #region Iterative aproach
-
-        public decimal IterativeFindTraceWithProfit(int searchDepth = 3, decimal arbitraryCurrencyAmount = 1m)
+        
+        public decimal FindBestChainOfTransactions(decimal arbitraryCurrencyAmount = 1m)
         {
             Vertice enterVertice =
-                _currencyNetwork.VerticesDictionary[Constats.ArbitraryCurrency];
+                _currencyNetwork.VerticesDictionary[Constants.EnterCurrency];
 
             _bestTrace = null;
             BestTraceProfit = 0;
 
             PrintInColor("Crawling through the network ...", ConsoleColor.DarkGray);
 
-            enterVertice.Edges.ForEach(e => Console.Write("_"));
+            if(Constants.LiveProgressBar)
+                enterVertice.Edges.ForEach(e => Console.Write("_"));
             Console.WriteLine();
 
             Parallel.ForEach(enterVertice.Edges, (e) =>
-                {
+                {   
                     var singleList = new List<Edge> { e };
                     FollowTransaction(singleList, arbitraryCurrencyAmount);
-                    Console.Write("*");
+                    if(Constants.LiveProgressBar)
+                        Console.Write("*");
                 });
             Console.WriteLine();
 
             return BestTraceProfit;
         }
 
+        private void FollowTransaction(List<Edge> edges, decimal currentValue, int currentDepth = 0)
+        {
+            currentDepth++;
+            if (currentDepth >= _searchDepth)
+                return;
+
+            var currentEdge = edges[edges.Count - 1];
+            var nextVertice = currentEdge.Head;
+
+            SimulateExchange(ref currentValue, currentEdge);
+            SimulateCommision(ref currentValue);
+
+            var nextVertArbitraryValue = nextVertice.ArbitraryValue;
+            if (nextVertArbitraryValue == 0)
+                return;
+
+            var arbitraryValue = currentValue / nextVertArbitraryValue;
+
+            lock (this)
+            {
+                if (!IsNewBestToVerticeProfit(nextVertice, arbitraryValue)) return;
+                CheckForNewBestGlobalProfit(edges, arbitraryValue);
+            }
+
+            foreach (var e in nextVertice.Edges)
+            {
+                //if (edges.Contains(e))
+                //    continue;
+
+                var extendedEdges = new List<Edge>(edges) { e };
+                FollowTransaction(extendedEdges, currentValue, currentDepth);
+            }
+        }
+        
         public decimal BestTraceProfit { private set; get; }
 
-        private int _searchDepth = 5;
+        private int _searchDepth;
         public int SearchDepth
         {
             set
@@ -91,7 +136,7 @@ namespace TraceMapper
             get => _searchDepth;
         }
 
-        private decimal _commision = 0.1m / 100m;
+        private decimal _commision;
         public decimal Commision
         {
             set
@@ -114,11 +159,12 @@ namespace TraceMapper
                 if (BestTraceProfit < 1)
                 {
                     PrintInColor($"Founded chain is not profitable yet, only {BestTraceProfit} left ...", ConsoleColor.DarkGray);
+                    WriteChainToConsole();
                 }
                 else
                 {
                     PlayWinnerMusic();
-                    PrintInColor( "$$$ Profitable path founded! $$$", ConsoleColor.Green);
+                    PrintInColor("$$$ Profitable path founded! $$$", ConsoleColor.Green);
                     double rewardPercentage = ((double)BestTraceProfit - 1) * 100.0;
                     PrintInColor($"$$$ Profit size: {string.Format("{0:0.00}", rewardPercentage)}%       $$$", ConsoleColor.DarkGreen);
 
@@ -126,52 +172,39 @@ namespace TraceMapper
                     var result = $"==========BEST FOUNDED TRACE==========" +
                                   Environment.NewLine + $"Result after: {BestTraceProfit}";
                     PrintInColor(result, ConsoleColor.Magenta);
-                    Console.Write($"> {Constats.ArbitraryCurrency}");
-                    foreach (var edge in _bestTrace)
-                        Console.Write($" > {edge.Head.Currency}");
-                    Console.Write($" > {Constats.ArbitraryCurrency} {Environment.NewLine}");
+                    WriteChainToConsole();
                     var resultFoot = @"======================================" + Environment.NewLine;
                     PrintInColor(resultFoot, ConsoleColor.Magenta);
                 }
             }
         }
 
-        private void FollowTransaction(List<Edge> edges, decimal currentValue, int currentDepth = 0)
+        private void WriteChainToConsole()
         {
-            currentDepth++;
-            if (currentDepth >= _searchDepth)
-                return;
-
-            var currentEdge = edges[edges.Count - 1];
-            var nextVertice = currentEdge.Head;
-
-            SimulateExchange(ref currentValue, currentEdge);
-            SimulateCommision(ref currentValue);
-
-            var nextVertArbitraryValue = nextVertice.ArbitraryValue;
-            if (nextVertArbitraryValue == 0)
-                return;
-
-            var arbitraryValue = currentValue / nextVertArbitraryValue;
-
-            lock (this)
-                CheckForNewBestProfit(edges, arbitraryValue);
-
-            foreach (var e in nextVertice.Edges)
-            {
-                //if (edges.Contains(e))
-                //    continue;
-
-                var extendedEdges = new List<Edge>(edges) { e };
-                FollowTransaction(extendedEdges, currentValue, currentDepth);
-            }
+            Console.Write($"> {Constants.EnterCurrency}");
+            foreach (var edge in _bestTrace)
+                Console.Write($" > {edge.Head.Currency}");
+            Console.Write($" > {Constants.EnterCurrency} {Environment.NewLine}");
         }
 
-        private void CheckForNewBestProfit(List<Edge> edges, decimal arbitraryValue)
+        private void CheckForNewBestGlobalProfit(List<Edge> edges, decimal arbitraryValue)
         {
             if (arbitraryValue < BestTraceProfit) return;            
             _bestTrace = edges;
             BestTraceProfit = arbitraryValue;
+        }
+
+        private Dictionary<Currency, decimal> _bestChainToVertice;
+
+        private bool IsNewBestToVerticeProfit(Vertice verticeToCheck, decimal arbitraryValue)
+        {
+            if (!_bestChainToVertice.ContainsKey(verticeToCheck.Currency)
+                 || arbitraryValue > _bestChainToVertice[verticeToCheck.Currency])
+            {
+                _bestChainToVertice[verticeToCheck.Currency] = arbitraryValue;
+                return true;
+            }
+            return false;
         }
 
         private void SimulateCommision(ref decimal currentValue)
@@ -179,16 +212,9 @@ namespace TraceMapper
             currentValue -= currentValue * _commision;
         }
 
-        private static decimal SimulateExchange(ref decimal currentValue, Edge currentEdge) => currentValue /= currentEdge.ExchangeRate;
+        private static decimal SimulateExchange(ref decimal currentValue, Edge currentEdge) 
+            => currentValue /= currentEdge.ExchangeRate;
 
-        #endregion
-
-        #region Bellman-Ford aproach
-
-        private void BellmanFordFindtraceWithProfit()
-        {
-            throw new NotImplementedException();
-        }
 
         #endregion
     }

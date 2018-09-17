@@ -8,8 +8,8 @@ namespace Launcher
     {
         public static void ShowLogo()
         {
-            var color = ConsoleColor.Black;
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            var color = ConsoleColor.DarkGreen;
+            Console.BackgroundColor = ConsoleColor.Black;
 
             var logo = @" *********************************************************************************************************** 
 *  ________          __                                          __             __                          *
