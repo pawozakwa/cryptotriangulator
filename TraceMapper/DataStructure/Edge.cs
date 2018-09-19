@@ -11,13 +11,16 @@ namespace TraceMapper
         public decimal ExchangeRate;
         public ExchangeAPI ExchangeApi;
 
-        public Edge(string tickerName, Vertice head, ExchangeTicker ticker, ExchangeAPI exchangeApi, bool Inverted = false)
+        public bool Inverted;
+
+        public Edge(string tickerName, Vertice head, ExchangeTicker ticker, ExchangeAPI exchangeApi, bool inverted = false)
         {
             TickerName = tickerName;
             Head = head;
             Ticker = ticker;
             ExchangeApi = exchangeApi;
-            ExchangeRate = Inverted ? 1 / ticker.Bid : ticker.Ask;
+            ExchangeRate = inverted ? 1 / ticker.Bid : ticker.Ask;
+            Inverted = inverted;
             VerifyCorrectness();
         }
 

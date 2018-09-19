@@ -5,6 +5,7 @@ using ExchangeSharp;
 using Contracts;
 using System.Collections.Generic;
 
+using static DataStructures.Extensions;
 using static Helpers.Helpers;
 using static Helpers.SoundsProvider;
 
@@ -60,15 +61,15 @@ namespace TraceMapper
 
         #endregion
 
-        #region Iterative aproach
+        #region Scanning network
         
         public decimal FindBestChainOfTransactions(decimal arbitraryCurrencyAmount = 1m)
         {
             Vertice enterVertice =
                 _currencyNetwork.VerticesDictionary[Constants.EnterCurrency];
 
-            _bestTrace = null;
-            BestTraceProfit = 0;
+            _bestChain = null;
+            BestChainProfit = 0;
 
             PrintInColor("Crawling through the network ...", ConsoleColor.DarkGray);
 
@@ -85,7 +86,7 @@ namespace TraceMapper
                 });
             Console.WriteLine();
 
-            return BestTraceProfit;
+            return BestChainProfit;
         }
 
         private void FollowTransaction(List<Edge> edges, decimal currentValue, int currentDepth = 0)
@@ -94,7 +95,7 @@ namespace TraceMapper
             if (currentDepth >= _searchDepth)
                 return;
 
-            var currentEdge = edges[edges.Count - 1];
+            var currentEdge = edges.Last();
             var nextVertice = currentEdge.Head;
 
             SimulateExchange(ref currentValue, currentEdge);
@@ -122,7 +123,7 @@ namespace TraceMapper
             }
         }
         
-        public decimal BestTraceProfit { private set; get; }
+        public decimal BestChainProfit { private set; get; }
 
         private int _searchDepth;
         public int SearchDepth
@@ -148,50 +149,57 @@ namespace TraceMapper
             get => _commision;
         }
 
-        private List<Edge> _bestTrace;
+        private List<Edge> _bestChain;
 
         public void ShowBestFoundedTrace()
         {
             lock (this)
             {
-                if (_bestTrace == null) throw new Exception("There is no best trace");
+                if (_bestChain == null) throw new Exception("There is no best trace");
 
-                if (BestTraceProfit < 1)
+                var bestCompleteChain = _bestChain.GetCompleteChain();
+
+                if (BestChainProfit < 0.9m) // 1)
                 {
-                    PrintInColor($"Founded chain is not profitable yet, only {BestTraceProfit} left ...", ConsoleColor.DarkGray);
-                    WriteChainToConsole();
+                    PrintInColor($"Founded chain is not profitable yet, only {BestChainProfit} left ...", ConsoleColor.DarkGray);
+                    WriteChainToConsole(bestCompleteChain);
                 }
                 else
                 {
                     PlayWinnerMusic();
                     PrintInColor("$$$ Profitable path founded! $$$", ConsoleColor.Green);
-                    double rewardPercentage = ((double)BestTraceProfit - 1) * 100.0;
+                    double rewardPercentage = ((double)BestChainProfit - 1) * 100.0;
                     PrintInColor($"$$$ Profit size: {string.Format("{0:0.00}", rewardPercentage)}%       $$$", ConsoleColor.DarkGreen);
 
                     var previousConsoleColor = Console.ForegroundColor;
                     var result = $"==========BEST FOUNDED TRACE==========" +
-                                  Environment.NewLine + $"Result after: {BestTraceProfit}";
+                                  Environment.NewLine + $"Result after: {BestChainProfit}";
                     PrintInColor(result, ConsoleColor.Magenta);
-                    WriteChainToConsole();
+                    
+                    WriteChainToConsole(bestCompleteChain);
+                    PrintInColor($"Real result: {GetExactCurrentReward(bestCompleteChain).ToString()}", ConsoleColor.Yellow);
+
                     var resultFoot = @"======================================" + Environment.NewLine;
                     PrintInColor(resultFoot, ConsoleColor.Magenta);
                 }
             }
         }
 
-        private void WriteChainToConsole()
+        private void WriteChainToConsole(List<Edge> chain)
         {
             Console.Write($"> {Constants.EnterCurrency}");
-            foreach (var edge in _bestTrace)
+            foreach (var edge in chain)
                 Console.Write($" > {edge.Head.Currency}");
-            Console.Write($" > {Constants.EnterCurrency} {Environment.NewLine}");
+            //Console.Write($" > {Constants.EnterCurrency} {Environment.NewLine}");
+            Console.WriteLine();
         }
 
         private void CheckForNewBestGlobalProfit(List<Edge> edges, decimal arbitraryValue)
         {
-            if (arbitraryValue < BestTraceProfit) return;            
-            _bestTrace = edges;
-            BestTraceProfit = arbitraryValue;
+            if (arbitraryValue < BestChainProfit) return;
+            Debug($"New best chain profit: {arbitraryValue}");
+            _bestChain = edges;
+            BestChainProfit = arbitraryValue;
         }
 
         private Dictionary<Currency, decimal> _bestChainToVertice;
@@ -215,6 +223,50 @@ namespace TraceMapper
         private static decimal SimulateExchange(ref decimal currentValue, Edge currentEdge) 
             => currentValue /= currentEdge.ExchangeRate;
 
+        #endregion
+
+        #region Calculate exact current reward
+
+        public decimal GetExactCurrentReward(List<Edge> completeChainToAnalyze)
+        {
+            decimal initialAmount = 1m;
+
+            decimal[] intermediateAmounts = new decimal[completeChainToAnalyze.Count];
+            intermediateAmounts[0] = initialAmount;
+            
+            for (int i = 0; i < completeChainToAnalyze.Count - 1; i++)
+            {
+                var edge = completeChainToAnalyze[i];
+                var orderBook = _exchangeApi.GetOrderBookAsync(edge.TickerName, 50).GetAwaiter().GetResult();
+                
+                if (!edge.Inverted)
+                {
+                    foreach (var order in orderBook.Asks.Values)
+                    {
+                        var price = order.Price;
+
+                        var amountToPay = Math.Min(intermediateAmounts[i], order.Amount * price);
+
+                        intermediateAmounts[i] -= amountToPay;
+                        intermediateAmounts[i + 1] += amountToPay / price;
+                    }
+                }
+                else
+                {
+                    foreach (var order in orderBook.Bids.Values)
+                    {
+                        var price = 1 / order.Price;
+
+                        var amountToPay = Math.Min(intermediateAmounts[i], order.Amount * price);
+
+                        intermediateAmounts[i] -= amountToPay;
+                        intermediateAmounts[i + 1] += amountToPay / price;
+                    }
+                }
+            }
+
+            return intermediateAmounts[intermediateAmounts.Length - 1] - initialAmount;
+        }
 
         #endregion
     }

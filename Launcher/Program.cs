@@ -25,7 +25,7 @@ namespace Launcher
             
             for (int i = 0; i < simulationLenght; i++)
             {
-                Thread.Sleep(3000); // Avoid ticker get rejection
+                Thread.Sleep(1000); // Avoid ticker get rejection
                 Console.WriteLine("+--------------------------------------------------------------------------------------------------+");
 
                 crawler.InitializeNetwork().GetAwaiter().GetResult();
@@ -34,7 +34,7 @@ namespace Launcher
                 Stopwatch stopWatch = new Stopwatch();
 
                 stopWatch.Restart();
-                accountBalance = crawler.FindBestChainOfTransactions(accountBalance);
+                crawler.FindBestChainOfTransactions(accountBalance);
                 PrintInColor($"Searching took {stopWatch.Elapsed.TotalSeconds} seconds", ConsoleColor.Cyan);
                 crawler.ShowBestFoundedTrace();
 
