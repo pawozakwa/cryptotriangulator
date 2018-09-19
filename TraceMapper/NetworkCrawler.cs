@@ -159,7 +159,7 @@ namespace TraceMapper
 
                 var bestCompleteChain = _bestChain.GetCompleteChain();
 
-                if (BestChainProfit < 0.9m) // 1)
+                if (BestChainProfit <  1)// 0.9m)
                 {
                     PrintInColor($"Founded chain is not profitable yet, only {BestChainProfit} left ...", ConsoleColor.DarkGray);
                     WriteChainToConsole(bestCompleteChain);
@@ -237,7 +237,7 @@ namespace TraceMapper
             for (int i = 0; i < completeChainToAnalyze.Count - 1; i++)
             {
                 var edge = completeChainToAnalyze[i];
-                var orderBook = _exchangeApi.GetOrderBookAsync(edge.TickerName, 50).GetAwaiter().GetResult();
+                var orderBook = _exchangeApi.GetOrderBookAsync(edge.TickerName, 500).GetAwaiter().GetResult();
                 
                 if (!edge.Inverted)
                 {
