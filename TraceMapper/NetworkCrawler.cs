@@ -75,7 +75,6 @@ namespace TraceMapper
 
             if(Constants.LiveProgressBar)
                 enterVertice.Edges.ForEach(e => Console.Write("_"));
-            Console.WriteLine();
 
             Parallel.ForEach(enterVertice.Edges, (e) =>
                 {   
@@ -84,7 +83,6 @@ namespace TraceMapper
                     if(Constants.LiveProgressBar)
                         Console.Write("*");
                 });
-            Console.WriteLine();
 
             return BestChainProfit;
         }
@@ -159,9 +157,9 @@ namespace TraceMapper
 
                 var bestCompleteChain = _bestChain.GetCompleteChain();
 
-                if (BestChainProfit <  1)// 0.9m)
+                if (BestChainProfit < 1m)
                 {
-                    PrintInColor($"Founded chain is not profitable yet, only {BestChainProfit} left ...", ConsoleColor.DarkGray);
+                    PrintInColor($"Founded chain is not profitable yet, only {BestChainProfit}% left ...", ConsoleColor.DarkGray);
                     WriteChainToConsole(bestCompleteChain);
                 }
                 else
@@ -229,12 +227,12 @@ namespace TraceMapper
 
         public decimal GetExactCurrentReward(List<Edge> completeChainToAnalyze)
         {
-            decimal initialAmount = 1m;
+            decimal initialAmount = 0.01m;
 
-            decimal[] intermediateAmounts = new decimal[completeChainToAnalyze.Count];
+            decimal[] intermediateAmounts = new decimal[completeChainToAnalyze.Count + 1];
             intermediateAmounts[0] = initialAmount;
             
-            for (int i = 0; i < completeChainToAnalyze.Count - 1; i++)
+            for (int i = 0; i < completeChainToAnalyze.Count; i++)
             {
                 var edge = completeChainToAnalyze[i];
                 var orderBook = _exchangeApi.GetOrderBookAsync(edge.TickerName, 500).GetAwaiter().GetResult();
@@ -246,9 +244,14 @@ namespace TraceMapper
                         var price = order.Price;
 
                         var amountToPay = Math.Min(intermediateAmounts[i], order.Amount * price);
+                        if (amountToPay <= 0) break;
+
+                        var amountToGet = amountToPay / price;
 
                         intermediateAmounts[i] -= amountToPay;
-                        intermediateAmounts[i + 1] += amountToPay / price;
+                        intermediateAmounts[i + 1] += amountToGet;
+
+                        Debug($"Straight {edge.TickerName}: {amountToGet} for {amountToPay}   Price:{price}");
                     }
                 }
                 else
@@ -258,14 +261,20 @@ namespace TraceMapper
                         var price = 1 / order.Price;
 
                         var amountToPay = Math.Min(intermediateAmounts[i], order.Amount * price);
+                        if (amountToPay <= 0) break;
+
+                        var amountToGet = amountToPay / price;
 
                         intermediateAmounts[i] -= amountToPay;
-                        intermediateAmounts[i + 1] += amountToPay / price;
+                        intermediateAmounts[i + 1] += amountToGet;
+
+                        Debug($"Inverted {edge.TickerName}: {amountToGet} for {amountToPay}   Price:{price}");
                     }
                 }
             }
 
-            return intermediateAmounts[intermediateAmounts.Length - 1] - initialAmount;
+            var percentLeft = (intermediateAmounts[intermediateAmounts.Length - 1] - initialAmount) * 100m;
+            return percentLeft;
         }
 
         #endregion
