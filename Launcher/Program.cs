@@ -17,16 +17,19 @@ namespace Launcher
             CustomizeConsole();
             Demo.ShowLogo();
 
+            PrintInColor("Creating api provider", color:ConsoleColor.Cyan);
             var apiProvider = new ExchangeApiProvider();
+            PrintInColor("Creating network crawler", color: ConsoleColor.Cyan);
             var crawler = new NetworkCrawler(apiProvider.GetApi(Exchange.Binance));
             var accountBalance = 1m;
 
-            var simulationLenght = 2000;
+            var simulationLenght = 2000000;
             
             for (int i = 0; i < simulationLenght; i++)
             {
                 Thread.Sleep(1001); // Avoid ticker get rejection
                 Console.WriteLine("+--------------------------------------------------------------------------------------------------+");
+
 
                 crawler.InitializeNetwork().GetAwaiter().GetResult();
                 //accountBalance = crawler.IterativeFindTraceWithProfit(depth, accountBalance);
@@ -35,7 +38,7 @@ namespace Launcher
 
                 stopWatch.Restart();
                 crawler.FindBestChainOfTransactions(accountBalance);
-                //PrintInColor($"Searching took {stopWatch.Elapsed.TotalSeconds} seconds", ConsoleColor.Cyan);
+                PrintInColor($"Searching took {stopWatch.Elapsed.TotalSeconds} seconds", ConsoleColor.Cyan);
                 crawler.ShowBestFoundedTrace();
             }
             

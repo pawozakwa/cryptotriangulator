@@ -22,5 +22,10 @@ namespace Helpers
             Console.ForegroundColor = oldColor;
     #endif
         }
+
+        public static void LogToFile(string text)
+        {
+            //System.IO.TextWriter.W
+        }
     }
 }

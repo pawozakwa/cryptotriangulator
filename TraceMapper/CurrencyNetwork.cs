@@ -58,7 +58,9 @@ namespace TraceMapper
                 Edges.Add(backwardEdge);
                 PrintDebugForTicker(tickerName, ticker, head, tail, backwardEdge);
             }
-            catch (Exception) { Debug("Ticker is broken, exchange rate equal zero!"); }
+            catch (Exception) {
+                //Debug("Ticker is broken, exchange rate equal zero!");
+            }
         }
 
         private void TryToAddForwardEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi, Currency? head, Currency? tail, Vertice headVertice, Vertice tailVertice)
@@ -70,7 +72,9 @@ namespace TraceMapper
                 Edges.Add(edge);
                 PrintDebugForTicker(tickerName, ticker,  tail, head, edge);
             }
-            catch (Exception) { Debug("Ticker is broken, exchange rate equal zero!"); }
+            catch (Exception) {
+                //Debug("Ticker is broken, exchange rate equal zero!");
+            }
         }
 
         private static void PrintDebugForTicker(string tickerName, ExchangeTicker ticker, Currency? head, Currency? tail, Edge backwardEdge)

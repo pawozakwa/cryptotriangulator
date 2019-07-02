@@ -233,13 +233,26 @@ namespace TraceMapper
 
             decimal[] intermediateAmounts = new decimal[completeChainToAnalyze.Count + 1];
             intermediateAmounts[0] = initialAmount;
-            
+
+            Edge edge;
+
+            var booksRecevingTasks = new List<Task<ExchangeOrderBook>>();
             for (int i = 0; i < completeChainToAnalyze.Count; i++)
             {
-                var edge = completeChainToAnalyze[i];
-                var orderBook = _exchangeApi.GetOrderBookAsync(edge.TickerName, 500).GetAwaiter().GetResult();
+                edge = completeChainToAnalyze[i];
+                booksRecevingTasks[i] = _exchangeApi.GetOrderBookAsync(edge.TickerName, 500);
+            }
+                        
+            for (int i = 0; i < completeChainToAnalyze.Count; i++)
+            {
+                edge = completeChainToAnalyze[i];
+                var orderBook = booksRecevingTasks[i].Result;
                 //TODO : order should be getted async at the begging, not in each loop
-                
+
+                //TODO : First iteration should update initial amount
+
+                // HOW TO CALCULATE HOW MUCH BTC WE NEED TO SPENT TO GET MAX PROFIT?
+
                 if (!edge.Inverted)
                 {
                     foreach (var order in orderBook.Asks.Values)
