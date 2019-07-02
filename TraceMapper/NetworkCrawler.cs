@@ -236,6 +236,7 @@ namespace TraceMapper
             {
                 var edge = completeChainToAnalyze[i];
                 var orderBook = _exchangeApi.GetOrderBookAsync(edge.TickerName, 500).GetAwaiter().GetResult();
+                //Each order should be getted async at the begging, not in each loop
                 
                 if (!edge.Inverted)
                 {
