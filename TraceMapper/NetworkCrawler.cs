@@ -175,6 +175,8 @@ namespace TraceMapper
                     PrintInColor(result, ConsoleColor.Magenta);
                     
                     WriteChainToConsole(bestCompleteChain);
+                    
+                    //TODO: Calculate real reward for every potentially profitable trace
                     PrintInColor($"Real result: {GetExactCurrentReward(bestCompleteChain).ToString()}", ConsoleColor.Yellow);
 
                     var resultFoot = @"======================================" + Environment.NewLine;
@@ -236,7 +238,7 @@ namespace TraceMapper
             {
                 var edge = completeChainToAnalyze[i];
                 var orderBook = _exchangeApi.GetOrderBookAsync(edge.TickerName, 500).GetAwaiter().GetResult();
-                //Each order should be getted async at the begging, not in each loop
+                //TODO : order should be getted async at the begging, not in each loop
                 
                 if (!edge.Inverted)
                 {
