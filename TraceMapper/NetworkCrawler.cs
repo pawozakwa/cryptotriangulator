@@ -27,7 +27,13 @@ namespace TraceMapper
         {
             LoadContants();
 
-            _currencyNetwork = new CurrencyNetwork();
+            //TODO: Instead of recreation of network it should be refilled with data
+            // using dictionary of ticker to edges
+
+            //Remember about cleanup
+            //In produce environment Network should be recreated in some periods
+
+            _currencyNetwork = new CurrencyNetwork();  
             _bestChainToVertice = new Dictionary<Currency, decimal>();
             var stopWatch = new Stopwatch();
 
