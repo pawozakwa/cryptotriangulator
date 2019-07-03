@@ -27,7 +27,6 @@ namespace Launcher
             
             for (int i = 0; i < simulationLenght; i++)
             {
-                Thread.Sleep(1001); // Avoid ticker get rejection
                 Console.WriteLine("+--------------------------------------------------------------------------------------------------+");
 
 
@@ -40,6 +39,10 @@ namespace Launcher
                 crawler.FindBestChainOfTransactions(accountBalance);
                 PrintInColor($"Searching took {stopWatch.Elapsed.TotalSeconds} seconds", ConsoleColor.Cyan);
                 crawler.ShowBestFoundedTrace();
+
+                Console.WriteLine();
+
+                Thread.Sleep(1001); // Avoid ticker get rejection
             }
             
             Console.ReadLine();

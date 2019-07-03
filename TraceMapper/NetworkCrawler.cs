@@ -33,13 +33,16 @@ namespace TraceMapper
 
             Console.Write("Downloading actual tickers...");
             stopWatch.Start();
-            var tickersFromExchange = await _exchangeApi.GetTickersAsync();
+            var tickersFromExchange = _exchangeApi.GetTickersAsync();
             stopWatch.Stop();
             Console.WriteLine($"   <= Done!");
             Console.Write("Feeding Network with actual tickers...");
             stopWatch.Restart();
-            foreach (var tickerKV in tickersFromExchange)
+            foreach (var tickerKV in await tickersFromExchange)
             {
+                if (tickerKV.Value.Ask == 0 || tickerKV.Value.Bid == 0 || tickerKV.Value.Last == 0)
+                    continue;
+
                 try
                 {
                     _currencyNetwork.AddEdge(tickerKV.Key, tickerKV.Value, _exchangeApi);
@@ -177,7 +180,7 @@ namespace TraceMapper
                     WriteChainToConsole(bestCompleteChain);
                     
                     //TODO: Calculate real reward for every potentially profitable trace
-                    PrintInColor($"Real result: {GetExactCurrentReward(bestCompleteChain).ToString()}", ConsoleColor.Yellow);
+                    PrintInColor($"Real result: {GetOptimizedReward(bestCompleteChain).ToString()}", ConsoleColor.Yellow);
 
                     var resultFoot = @"======================================" + Environment.NewLine;
                     PrintInColor(resultFoot, ConsoleColor.Magenta);
@@ -227,29 +230,76 @@ namespace TraceMapper
 
         #region Calculate exact current reward
 
-        public decimal GetExactCurrentReward(List<Edge> completeChainToAnalyze)
-        {
-            decimal initialAmount = 0.01m;
+        private const decimal minimalInvestitionSize = 0.00001m;
 
-            decimal[] intermediateAmounts = new decimal[completeChainToAnalyze.Count + 1];
+        private List<Edge> _chainToOptimize;
+
+        public decimal GetOptimizedReward(List<Edge> chainToAnalyze, decimal maxAmountToInvest = 1m)
+        {
+            _chainToOptimize = chainToAnalyze;
+
+            var booksRecevingTasks = new List<Task<ExchangeOrderBook>>();
+            Edge edge;
+            for (int i = 0; i < chainToAnalyze.Count; i++)
+            {
+                edge = chainToAnalyze[i];
+                booksRecevingTasks.Add(_exchangeApi.GetOrderBookAsync(edge.TickerName, 500));
+            }
+
+            var profitsDictionary = new Dictionary<decimal, decimal>();
+
+            FillProfitDictionary(booksRecevingTasks, ref profitsDictionary, minimalInvestitionSize, maxAmountToInvest, minimalInvestitionSize);
+
+            return FindBestAmountToInvest(profitsDictionary);
+        }
+
+        private decimal FindBestAmountToInvest(Dictionary<decimal, decimal> profitsDictionary)
+        {
+            decimal maxProfit = decimal.MinValue;
+            foreach(var keyValuePair in profitsDictionary)
+            {
+                var profit = keyValuePair.Value - keyValuePair.Key;
+
+                if (profit > maxProfit)
+                    maxProfit = profit;
+            }
+            return maxProfit;
+        }
+
+        private void FillProfitDictionary(List<Task<ExchangeOrderBook>> getBooksTasks, ref Dictionary<decimal, decimal> profitDictionary, decimal start, decimal limit, decimal minimalStep, int depth = 8){
+    
+            if (depth == 0) 
+                return;
+                
+            depth--;
+                
+            var mid = (limit - start) *0.5m;
+            var p1 = mid - minimalStep * 0.5m;
+            var p2 = mid + minimalStep * 0.5m;
+            
+            profitDictionary[p1] = GetExactCurrentReward(getBooksTasks, p1);
+            profitDictionary[p2] = GetExactCurrentReward(getBooksTasks, p2);
+            
+            if(profitDictionary[p1] > profitDictionary[p2])
+                FillProfitDictionary(getBooksTasks, ref profitDictionary, start, p2, minimalStep, depth);
+            else
+                FillProfitDictionary(getBooksTasks, ref profitDictionary, p1, limit, minimalStep, depth);
+        }
+
+        private decimal GetExactCurrentReward(List<Task<ExchangeOrderBook>> booksRecevingTasks, decimal initialAmount = 0.01m )
+        {
+            decimal[] intermediateAmounts = new decimal[_chainToOptimize.Count + 1];
             intermediateAmounts[0] = initialAmount;
 
             Edge edge;
-
-            var booksRecevingTasks = new List<Task<ExchangeOrderBook>>();
-            for (int i = 0; i < completeChainToAnalyze.Count; i++)
-            {
-                edge = completeChainToAnalyze[i];
-                booksRecevingTasks[i] = _exchangeApi.GetOrderBookAsync(edge.TickerName, 500);
-            }
                         
-            for (int i = 0; i < completeChainToAnalyze.Count; i++)
+            for (int i = 0; i < _chainToOptimize.Count; i++)
             {
-                edge = completeChainToAnalyze[i];
+                edge = _chainToOptimize[i];
                 var orderBook = booksRecevingTasks[i].Result;
-                //TODO : order should be getted async at the begging, not in each loop
+                //TODO: Order should be getted async at the begging, not in each loop
 
-                //TODO : First iteration should update initial amount
+                //TODO: First iteration should update initial amount
 
                 // HOW TO CALCULATE HOW MUCH BTC WE NEED TO SPENT TO GET MAX PROFIT?
                 // !BINARY SEARCH!
@@ -294,26 +344,6 @@ namespace TraceMapper
             return percentLeft;
         }
         
-        void FillProfitDictionary(ref profitDictionary, decimal start, decimal limit, decimal minimalStep, int depth = 8){
-    
-            if (depth == 0) 
-                return;
-                
-            depth--;
-                
-            var mid = limit - start *0.5m;
-            var p1 = mid;
-            var p2 = mid + minimalStep;
-            
-            profitDictionary[p1] = calculateExactProfit(decimal p1);
-            profitDictionary[p2] = calculateExactProfit(decimal p2);
-            
-            if(profitDictionary[p1] > profitDictionary[p2])
-                FillProfitDictionary(profitDictionary, start, p2, minimalStep, depth);
-            else
-                FillProfitDictionary(profitDictionary, p1, limit, minimalStep, depth);
-        }
-
         #endregion
     }
 }

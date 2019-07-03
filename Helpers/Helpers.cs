@@ -16,10 +16,10 @@ namespace Helpers
         public static void Debug(string text)
         {
     #if DEBUG
-            var oldColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(text);
-            Console.ForegroundColor = oldColor;
+            //var oldColor = Console.ForegroundColor;
+            //Console.ForegroundColor = ConsoleColor.DarkGray;
+            //Console.WriteLine(text);
+            //Console.ForegroundColor = oldColor;
     #endif
         }
 

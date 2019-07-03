@@ -59,7 +59,7 @@ namespace TraceMapper
                 PrintDebugForTicker(tickerName, ticker, head, tail, backwardEdge);
             }
             catch (Exception) {
-                //Debug("Ticker is broken, exchange rate equal zero!");
+                Debug("Ticker is broken, exchange rate equal zero!");
             }
         }
 
@@ -73,7 +73,7 @@ namespace TraceMapper
                 PrintDebugForTicker(tickerName, ticker,  tail, head, edge);
             }
             catch (Exception) {
-                //Debug("Ticker is broken, exchange rate equal zero!");
+                Debug("Ticker is broken, exchange rate equal zero!");
             }
         }
 
