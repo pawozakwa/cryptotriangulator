@@ -293,6 +293,26 @@ namespace TraceMapper
             var percentLeft = (intermediateAmounts[intermediateAmounts.Length - 1] - initialAmount) * 100m;
             return percentLeft;
         }
+        
+        void FillProfitDictionary(ref profitDictionary, decimal start, decimal limit, decimal minimalStep, int depth = 8){
+    
+            if (depth == 0) 
+                return;
+                
+            depth--;
+                
+            var mid = limit - start *0.5m;
+            var p1 = mid;
+            var p2 = mid + minimalStep;
+            
+            profitDictionary[p1] = calculateExactProfit(decimal p1);
+            profitDictionary[p2] = calculateExactProfit(decimal p2);
+            
+            if(profitDictionary[p1] > profitDictionary[p2])
+                FillProfitDictionary(profitDictionary, start, p2, minimalStep, depth);
+            else
+                FillProfitDictionary(profitDictionary, p1, limit, minimalStep, depth);
+        }
 
         #endregion
     }
