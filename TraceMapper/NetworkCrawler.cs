@@ -252,6 +252,7 @@ namespace TraceMapper
                 //TODO : First iteration should update initial amount
 
                 // HOW TO CALCULATE HOW MUCH BTC WE NEED TO SPENT TO GET MAX PROFIT?
+                // !BINARY SEARCH!
 
                 if (!edge.Inverted)
                 {
