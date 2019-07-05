@@ -240,7 +240,7 @@ namespace TraceMapper
 
         private List<Edge> _chainToOptimize;
 
-        public decimal GetOptimizedReward(List<Edge> chainToAnalyze, decimal maxAmountToInvest = 1m)
+        public decimal GetOptimizedReward(List<Edge> chainToAnalyze, decimal maxAmountToInvest = 0.01m)
         {
             _chainToOptimize = chainToAnalyze;
 
@@ -265,6 +265,8 @@ namespace TraceMapper
             foreach(var keyValuePair in profitsDictionary)
             {
                 var profit = keyValuePair.Value - keyValuePair.Key;
+
+                PrintInColor($"In this chain investing:{keyValuePair.Value} -> {keyValuePair.Key}, profit: {profit}", ConsoleColor.White);
 
                 if (profit > maxProfit)
                     maxProfit = profit;
