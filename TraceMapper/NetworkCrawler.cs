@@ -20,20 +20,18 @@ namespace TraceMapper
 
         public NetworkCrawler(ExchangeAPI exchangeApi)
         {
+            LoadContants();
             _exchangeApi = exchangeApi;
+            //_currencyNetwork = new CurrencyNetwork();  
         }
 
         public async Task InitializeNetwork()
         {
-            LoadContants();
-
-            //TODO: Instead of recreation of network it should be refilled with data
-            // using dictionary of ticker to edges
+            _currencyNetwork = new CurrencyNetwork(); //This can be moved to constructor to update without recreation, but Edge struct must become class
 
             //Remember about cleanup
             //In produce environment Network should be recreated in some periods
 
-            _currencyNetwork = new CurrencyNetwork();  
             _bestChainToVertice = new Dictionary<Currency, decimal>();
             var stopWatch = new Stopwatch();
 
@@ -266,7 +264,7 @@ namespace TraceMapper
             {
                 var profit = keyValuePair.Value - keyValuePair.Key;
 
-                PrintInColor($"In this chain investing:{keyValuePair.Value} -> {keyValuePair.Key}, profit: {profit}", ConsoleColor.White);
+                PrintInColor($"In this chain investing:{keyValuePair.Key} -> {keyValuePair.Value}, profit: {profit}", ConsoleColor.White);
 
                 if (profit > maxProfit)
                     maxProfit = profit;
@@ -321,7 +319,9 @@ namespace TraceMapper
                         var amountToPay = Math.Min(intermediateAmounts[i], order.Amount * price);
                         if (amountToPay <= 0) break;
 
-                        var amountToGet = amountToPay / price;
+                        var amountToGet =  amountToPay / price;
+
+                        SimulateCommision(ref amountToGet);
 
                         intermediateAmounts[i] -= amountToPay;
                         intermediateAmounts[i + 1] += amountToGet;
@@ -340,6 +340,8 @@ namespace TraceMapper
 
                         var amountToGet = amountToPay / price;
 
+                        SimulateCommision(ref amountToGet);
+
                         intermediateAmounts[i] -= amountToPay;
                         intermediateAmounts[i + 1] += amountToGet;
 
@@ -348,8 +350,10 @@ namespace TraceMapper
                 }
             }
 
-            var percentLeft = (intermediateAmounts[intermediateAmounts.Length - 1] - initialAmount) * 100m;
-            return percentLeft;
+            //var percentLeft = (intermediateAmounts[intermediateAmounts.Length - 1] - initialAmount) * 100m;
+            //return percentLeft;
+
+            return intermediateAmounts[intermediateAmounts.Length - 1];
         }
         
         #endregion

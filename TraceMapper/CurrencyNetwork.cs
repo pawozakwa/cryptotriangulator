@@ -12,12 +12,16 @@ namespace TraceMapper
     {
         public List<Edge> Edges;
         public Dictionary<Currency, Vertice> VerticesDictionary;
+        public Dictionary<string, Edge> ForwardEdgesDictionary;
+        public Dictionary<string, Edge> BackwardEdgesDictionary;
 
         public CurrencyNetwork()
         {
             Edges = new List<Edge>();
             VerticesDictionary = new Dictionary<Currency, Vertice>();
-        }
+            ForwardEdgesDictionary = new Dictionary<string, Edge>();
+            BackwardEdgesDictionary = new Dictionary<string, Edge>();
+    }
 
         /// <returns>True if currency added or already exist in the graph, otherwise false</returns>
         public bool AddEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi)
@@ -43,19 +47,26 @@ namespace TraceMapper
                 return false;
 
             AddVerticesIfNew(head, tail, out Vertice headVertice, out Vertice tailVertice);
-            TryToAddForwardEdge(tickerName, ticker, exchangeApi, head, tail, headVertice, tailVertice);
-            TryToAddBackwardEdge(tickerName, ticker, exchangeApi, head, tail, headVertice, tailVertice);
+            TryToAddForwardEdge(tickerName, ticker, head, tail, headVertice, tailVertice);
+            TryToAddBackwardEdge(tickerName, ticker, head, tail, headVertice, tailVertice);
 
             return true;
         }
 
-        private void TryToAddBackwardEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi, Currency? head, Currency? tail, Vertice headVertice, Vertice tailVertice)
+        private void TryToAddBackwardEdge(string tickerName, ExchangeTicker ticker, Currency? head, Currency? tail, Vertice headVertice, Vertice tailVertice)
         {
             try
             {
-                var backwardEdge = new Edge(tickerName, tailVertice, ticker, exchangeApi, true);
+                if (BackwardEdgesDictionary.ContainsKey(tickerName))
+                {
+                    BackwardEdgesDictionary[tickerName].Update(ticker, true);
+                    return;
+                }
+
+                var backwardEdge = new Edge(tickerName, tailVertice, ticker, true);
                 headVertice.Edges.Add(backwardEdge);
                 Edges.Add(backwardEdge);
+                BackwardEdgesDictionary.Add(tickerName, backwardEdge);
                 PrintDebugForTicker(tickerName, ticker, head, tail, backwardEdge);
             }
             catch (Exception) {
@@ -63,13 +74,20 @@ namespace TraceMapper
             }
         }
 
-        private void TryToAddForwardEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi, Currency? head, Currency? tail, Vertice headVertice, Vertice tailVertice)
+        private void TryToAddForwardEdge(string tickerName, ExchangeTicker ticker, Currency? head, Currency? tail, Vertice headVertice, Vertice tailVertice)
         {
             try
             {
-                var edge = new Edge(tickerName, headVertice, ticker, exchangeApi);
+                if (ForwardEdgesDictionary.ContainsKey(tickerName))
+                {
+                    ForwardEdgesDictionary[tickerName].Update(ticker, false);
+                    return;
+                }
+
+                var edge = new Edge(tickerName, headVertice, ticker);
                 tailVertice.Edges.Add(edge);
                 Edges.Add(edge);
+                ForwardEdgesDictionary.Add(tickerName, edge);
                 PrintDebugForTicker(tickerName, ticker,  tail, head, edge);
             }
             catch (Exception) {
@@ -92,7 +110,8 @@ namespace TraceMapper
             catch (Exception e)
             {
                 Debug(e.Message);
-                File.AppendAllLines("currencies.txt", new[] { symbol });
+                if (Constants.SaveWhatIsUnparsableToFile)
+                    File.AppendAllLines("currencies.txt", new[] { symbol });
                 return null;
             }
         }

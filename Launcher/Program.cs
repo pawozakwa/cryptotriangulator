@@ -24,9 +24,12 @@ namespace Launcher
             var accountBalance = 1m;
 
             var simulationLenght = 2000000;
+
+            var cycleTimer = new Stopwatch();
             
             for (int i = 0; i < simulationLenght; i++)
             {
+                cycleTimer.Restart();
                 Console.WriteLine("+--------------------------------------------------------------------------------------------------+");
 
 
@@ -42,7 +45,8 @@ namespace Launcher
 
                 Console.WriteLine();
 
-                Thread.Sleep(1001); // Avoid ticker get rejection
+                var delay = Math.Max((1500 - (int)cycleTimer.ElapsedMilliseconds), 0);
+                Thread.Sleep(delay); // Avoid ticker get rejection
             }
             
             Console.ReadLine();

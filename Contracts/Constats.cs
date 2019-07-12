@@ -19,5 +19,7 @@ namespace Contracts
         //Tweaks
 
         public const bool LiveProgressBar = false;
+
+        public const bool SaveWhatIsUnparsableToFile = false;
     }
 }
