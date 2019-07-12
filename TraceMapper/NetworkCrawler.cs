@@ -166,7 +166,8 @@ namespace TraceMapper
 
                 if (BestChainProfit < 1m)
                 {
-                    PrintInColor($"Founded chain is not profitable yet, only {BestChainProfit}% left ...", ConsoleColor.DarkGray);
+                    var formattedReward = String.Format("0:0.00000", BestChainProfit);
+                    PrintInColor($"Founded chain is not profitable yet, only {formattedReward}% left ...", ConsoleColor.DarkGray);
                     WriteChainToConsole(bestCompleteChain);
                 }
                 else

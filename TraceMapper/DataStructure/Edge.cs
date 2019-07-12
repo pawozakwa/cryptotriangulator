@@ -3,7 +3,7 @@ using ExchangeSharp;
 
 namespace TraceMapper
 {
-    public struct Edge
+    public class Edge
     {
         public readonly string TickerName;
         public readonly Vertice Head;        
