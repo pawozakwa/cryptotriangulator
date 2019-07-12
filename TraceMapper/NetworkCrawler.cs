@@ -22,12 +22,12 @@ namespace TraceMapper
         {
             LoadContants();
             _exchangeApi = exchangeApi;
-            //_currencyNetwork = new CurrencyNetwork();  
+            _currencyNetwork = new CurrencyNetwork();  
         }
 
         public async Task InitializeNetwork()
         {
-            _currencyNetwork = new CurrencyNetwork(); //This can be moved to constructor to update without recreation, but Edge struct must become class
+            //_currencyNetwork = new CurrencyNetwork(); //This can be moved to constructor to update without recreation, but Edge struct must become class
 
             //Remember about cleanup
             //In produce environment Network should be recreated in some periods
@@ -166,13 +166,12 @@ namespace TraceMapper
 
                 if (BestChainProfit < 1m)
                 {
-                    var formattedReward = String.Format("0:0.00000", BestChainProfit);
+                    var formattedReward = String.Format("{0:N6}", (double)BestChainProfit);
                     PrintInColor($"Founded chain is not profitable yet, only {formattedReward}% left ...", ConsoleColor.DarkGray);
                     WriteChainToConsole(bestCompleteChain);
                 }
                 else
                 {
-                    PlayWinnerMusic();
                     PrintInColor("$$$ Profitable path founded! $$$", ConsoleColor.Green);
                     double rewardPercentage = ((double)BestChainProfit - 1) * 100.0;
                     PrintInColor($"$$$ Profit size: {string.Format("{0:0.00}", rewardPercentage)}%       $$$", ConsoleColor.DarkGreen);
@@ -183,9 +182,17 @@ namespace TraceMapper
                     PrintInColor(result, ConsoleColor.Magenta);
                     
                     WriteChainToConsole(bestCompleteChain);
-                    
+
                     //TODO: Calculate real reward for every potentially profitable trace
-                    PrintInColor($"Real result: {GetOptimizedReward(bestCompleteChain).ToString()}", ConsoleColor.Yellow);
+
+                    var realReward = GetOptimizedReward(bestCompleteChain);
+
+                    if(realReward > 0)
+                    {
+                        PlayWinnerMusic();
+                        PrintInColor($"Real result: {realReward.ToString()}", ConsoleColor.Yellow);
+                    }
+
 
                     var resultFoot = @"======================================" + Environment.NewLine;
                     PrintInColor(resultFoot, ConsoleColor.Magenta);
@@ -255,12 +262,42 @@ namespace TraceMapper
 
             FillProfitDictionary(booksRecevingTasks, ref profitsDictionary, minimalInvestitionSize, maxAmountToInvest, minimalInvestitionSize);
 
-            return FindBestAmountToInvest(profitsDictionary);
+            var bestProfit = FindBestAmountToInvest(profitsDictionary, out decimal bestAmountToInvest);
+
+            SaveProfitToReportFileIfAny(chainToAnalyze, bestProfit, bestAmountToInvest);
+
+            return bestProfit;
         }
 
-        private decimal FindBestAmountToInvest(Dictionary<decimal, decimal> profitsDictionary)
+        private static void SaveProfitToReportFileIfAny(List<Edge> chainToAnalyze, decimal bestProfit, decimal bestAmountToInvest)
+        {
+            if (bestProfit > 0)
+            {
+                var report = new List<string>(){
+                    "--------------Founded profitable trace!-------------",
+                };
+                var chain = "BTC";
+                foreach (var edgeToPrint in chainToAnalyze)
+                    chain += $" > {edgeToPrint.Head.Currency}";
+
+                report.AddRange(new List<string>(){
+                        chain,
+                        "Real profit which can be obtained:",
+                        bestProfit.ToString() + " BTC",
+                        "By investing:",
+                        bestAmountToInvest.ToString() + " BTC",
+                        "----------------------------------------------------"
+                });
+
+                AddToFileOnDesktop(report.ToArray());
+            }
+        }
+
+        private decimal FindBestAmountToInvest(Dictionary<decimal, decimal> profitsDictionary, out decimal bestAmountToInvest)
         {
             decimal maxProfit = decimal.MinValue;
+            bestAmountToInvest = decimal.Zero;
+
             foreach(var keyValuePair in profitsDictionary)
             {
                 var profit = keyValuePair.Value - keyValuePair.Key;
@@ -268,8 +305,12 @@ namespace TraceMapper
                 PrintInColor($"In this chain investing:{keyValuePair.Key} -> {keyValuePair.Value}, profit: {profit}", ConsoleColor.White);
 
                 if (profit > maxProfit)
+                {
                     maxProfit = profit;
+                    bestAmountToInvest = keyValuePair.Key;
+                }
             }
+
             return maxProfit;
         }
 

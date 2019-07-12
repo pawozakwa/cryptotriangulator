@@ -1,10 +1,12 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Helpers
 {
     public static class Helpers
     {
-        
+
         public static void PrintInColor(string text, ConsoleColor color)
         {
             var lastColor = Console.ForegroundColor;
@@ -12,20 +14,26 @@ namespace Helpers
             Console.WriteLine(text);
             Console.ForegroundColor = lastColor;
         }
-        
+
         public static void Debug(string text)
         {
-    #if DEBUG
+#if DEBUG
             //var oldColor = Console.ForegroundColor;
             //Console.ForegroundColor = ConsoleColor.DarkGray;
             //Console.WriteLine(text);
             //Console.ForegroundColor = oldColor;
-    #endif
+#endif
         }
+        
+        private static string DesktopPath => Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        private static string LogFileName = "Triangulation results.txt";
+        private static string LogFilePath => Path.Combine(DesktopPath, LogFileName);
 
-        public static void LogToFile(string text)
+        public static void AddToFileOnDesktop(params string[] texts)
         {
-            //System.IO.TextWriter.W
+            using (var sw = File.AppendText(LogFilePath))
+                foreach (var text in texts)
+                    sw.WriteLineAsync(text);
         }
     }
 }

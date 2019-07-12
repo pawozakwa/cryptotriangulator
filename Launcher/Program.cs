@@ -14,10 +14,12 @@ namespace Launcher
     {
         static void Main(string[] args)
         {
+            SaveStartTimeToReportFile();
+
             CustomizeConsole();
             Demo.ShowLogo();
 
-            PrintInColor("Creating api provider", color:ConsoleColor.Cyan);
+            PrintInColor("Creating api provider", color: ConsoleColor.Cyan);
             var apiProvider = new ExchangeApiProvider();
             PrintInColor("Creating network crawler", color: ConsoleColor.Cyan);
             var crawler = new NetworkCrawler(apiProvider.GetApi(Exchange.Binance));
@@ -26,7 +28,7 @@ namespace Launcher
             var simulationLenght = 2000000;
 
             var cycleTimer = new Stopwatch();
-            
+
             for (int i = 0; i < simulationLenght; i++)
             {
                 cycleTimer.Restart();
@@ -48,8 +50,17 @@ namespace Launcher
                 var delay = Math.Max((1500 - (int)cycleTimer.ElapsedMilliseconds), 0);
                 Thread.Sleep(delay); // Avoid ticker get rejection
             }
-            
+
             Console.ReadLine();
+        }
+
+        private static void SaveStartTimeToReportFile()
+        {
+            AddToFileOnDesktop(new string[]
+            {
+                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+                 $"Uruchomienie: {DateTime.Now}"
+            });
         }
 
         private static void CustomizeConsole()
