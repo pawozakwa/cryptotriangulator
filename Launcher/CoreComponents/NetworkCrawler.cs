@@ -19,11 +19,11 @@ namespace Triangulator.CoreComponents
         private CurrencyNetwork _currencyNetwork;
         private ExchangeAPI _exchangeApi;
 
-        public NetworkCrawler(ExchangeAPI exchangeApi)
+        public NetworkCrawler(ExchangeAPI exchangeApi, CurrencyNetwork network)
         {
             LoadContants();
             _exchangeApi = exchangeApi;
-            _currencyNetwork = new CurrencyNetwork();  
+            _currencyNetwork = network;  
         }
 
         public async Task InitializeNetwork()
@@ -398,7 +398,7 @@ namespace Triangulator.CoreComponents
 
             return intermediateAmounts[intermediateAmounts.Length - 1];
         }
-        
+
         #endregion
     }
 }

@@ -24,7 +24,11 @@ namespace Triangulator
             PrintInColor("Creating api provider", color: ConsoleColor.Cyan);
             var apiProvider = new ExchangeApiProvider();
             PrintInColor("Creating network crawler", color: ConsoleColor.Cyan);
-            var crawler = new NetworkCrawler(apiProvider.GetApi(Exchange.Binance));
+
+            var network = new CurrencyNetwork();
+            var api = apiProvider.GetApi(Exchange.Binance);
+            var crawler = new NetworkCrawler(api, network);
+
             var accountBalance = 1m;
 
             var simulationLenght = 2000000;
@@ -35,7 +39,6 @@ namespace Triangulator
             {
                 cycleTimer.Restart();
                 Console.WriteLine("+--------------------------------------------------------------------------------------------------+");
-
 
                 crawler.InitializeNetwork().GetAwaiter().GetResult();
                 //accountBalance = crawler.IterativeFindTraceWithProfit(depth, accountBalance);

@@ -127,5 +127,14 @@ namespace Triangulator.CoreComponents
             tailVertice = VerticesDictionary.ContainsKey(t) ? VerticesDictionary[t] : new Vertice(t);
             VerticesDictionary[t] = tailVertice;
         }
+
+        #region Drawing network
+
+        public void OpenWindowWithNetworkRepresentation()
+        {
+
+        }
+
+        #endregion
     }
 }
