@@ -7,8 +7,10 @@ using System.Diagnostics;
 
 using static Helpers.Helpers;
 using static Helpers.SoundsProvider;
+using Launcher;
+using Triangulator.CoreComponents;
 
-namespace Launcher
+namespace Triangulator
 {
     class Program
     {

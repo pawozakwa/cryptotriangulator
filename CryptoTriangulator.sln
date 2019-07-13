@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Launcher", "Launcher\Launcher.csproj", "{C18DCDC6-6772-40E5-9445-DF00FAE9ABD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Triangulator", "Launcher\Triangulator.csproj", "{C18DCDC6-6772-40E5-9445-DF00FAE9ABD6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeProvider", "ExchangeProvider\ExchangeProvider.csproj", "{99674182-9902-472B-A729-AE3BC2AA31D5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Contracts\Contracts.csproj", "{1CD5D4FC-2BCF-45E5-8FAF-2B44394FC9C8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TraceMapper", "TraceMapper\TraceMapper.csproj", "{345F6370-62F0-45BD-840F-C8B433167D5F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helpers", "Helpers\Helpers.csproj", "{F46E8652-DC1C-4DE7-B94F-A875822E5B0C}"
 EndProject
@@ -33,10 +31,6 @@ Global
 		{1CD5D4FC-2BCF-45E5-8FAF-2B44394FC9C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CD5D4FC-2BCF-45E5-8FAF-2B44394FC9C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CD5D4FC-2BCF-45E5-8FAF-2B44394FC9C8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{345F6370-62F0-45BD-840F-C8B433167D5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{345F6370-62F0-45BD-840F-C8B433167D5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{345F6370-62F0-45BD-840F-C8B433167D5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{345F6370-62F0-45BD-840F-C8B433167D5F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F46E8652-DC1C-4DE7-B94F-A875822E5B0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F46E8652-DC1C-4DE7-B94F-A875822E5B0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F46E8652-DC1C-4DE7-B94F-A875822E5B0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
