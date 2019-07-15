@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Contracts.Enums;
 using ExchangeSharp;
 
 namespace ExchangeProvider
@@ -21,7 +22,6 @@ namespace ExchangeProvider
                 { Exchange.Bitmex, new ExchangeBitMEXAPI() },
                 { Exchange.Bitstamp, new ExchangeBitstampAPI() },
                 { Exchange.Bittrex, new ExchangeBittrexAPI() },
-                { Exchange.Bleutrade, new ExchangeBleutradeAPI() },
                 { Exchange.Coinbase, new ExchangeCoinbaseAPI() },
                 { Exchange.Cryptopia, new ExchangeCryptopiaAPI() },
                 { Exchange.Gemini, new ExchangeGeminiAPI() },

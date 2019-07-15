@@ -1,4 +1,4 @@
-﻿namespace ExchangeProvider
+﻿namespace Contracts.Enums
 {
     public enum Exchange
     {

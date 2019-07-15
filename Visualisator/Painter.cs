@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
+
+using Contracts.
 
 namespace Visualisator
 {
@@ -19,6 +16,11 @@ namespace Visualisator
         /// </summary>
         /// <param name="canvas"></param>
         public Painter(Canvas canvas)
+        {
+
+        }
+
+        public void FeedCanvasWithNetwork(ICurre
         {
 
         }

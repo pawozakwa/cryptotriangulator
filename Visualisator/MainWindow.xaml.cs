@@ -18,16 +18,16 @@ namespace Visualisator
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MapWindow : Window
     {
-        public MainWindow()
+        public MapWindow()
         {
             InitializeComponent();
 
             var drawer = new Painter(_canvas);            
         }
 
-        public InitializeDrawer( )
+        public void InitializeDrawer( )
         {
             
         }

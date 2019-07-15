@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Contracts
+namespace Contracts.Enums
 {
     public enum Currency
     {

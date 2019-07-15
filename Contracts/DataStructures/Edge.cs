@@ -1,7 +1,7 @@
-﻿using System;
-using ExchangeSharp;
+﻿using ExchangeSharp;
+using System;
 
-namespace TraceMapper
+namespace Contracts.DataStructures
 {
     public class Edge
     {

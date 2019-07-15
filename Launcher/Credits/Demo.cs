@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Launcher
+namespace Triangulator.Credits
 {
     public static class Demo
     {

@@ -26,16 +26,16 @@ namespace ExchangeProvider
                 {
                     Console.WriteLine("Exchange: " + KV.Value.Name);
 
-                    foreach (var item in await KV.Value.GetSymbolsAsync())
+                    foreach (var item in await KV.Value.GetMarketSymbolsAsync())
                     {
                         file.WriteLine(item);
-                        var separator = KV.Value.SymbolSeparator;
+                        var separator = KV.Value.MarketSymbolSeparator;
                         if ((item.StartsWith(s1) && item.EndsWith(s2)) ||
                             (item.StartsWith(s1m) && item.EndsWith(s2m)))
                         {
                             var name = item;
                             if (separator != "")
-                                name = item.Replace(KV.Value.SymbolSeparator, "");
+                                name = item.Replace(KV.Value.MarketSymbolSeparator, "");
 
                             Console.WriteLine(name);
 

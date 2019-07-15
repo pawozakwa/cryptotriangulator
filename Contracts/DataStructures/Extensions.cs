@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using Contracts;
-using TraceMapper;
+using Contracts.Enums;
 
-namespace DataStructures
+namespace Contracts.DataStructures
 {
     public static class Extensions
     {

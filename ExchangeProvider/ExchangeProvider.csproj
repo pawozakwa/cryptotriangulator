@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DigitalRuby.ExchangeSharp" Version="0.5.8" />
+    <PackageReference Include="DigitalRuby.ExchangeSharp" Version="0.6.0.1" />
   </ItemGroup>
 
   <ItemGroup>

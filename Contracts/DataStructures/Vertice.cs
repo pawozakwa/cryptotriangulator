@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Contracts;
+using Contracts.Enums;
 
-namespace TraceMapper
+namespace Contracts.DataStructures
 {
     public class Vertice
     {

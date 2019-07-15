@@ -5,7 +5,8 @@ using Contracts;
 using System.IO;
 
 using static Helpers.Helpers;
-using TraceMapper;
+using Contracts.DataStructures;
+using Contracts.Enums;
 
 namespace Triangulator.CoreComponents
 {
@@ -28,7 +29,7 @@ namespace Triangulator.CoreComponents
         public bool AddEdge(string tickerName, ExchangeTicker ticker, ExchangeAPI exchangeApi)
         {
             Currency? head, tail;
-            var separator = exchangeApi.SymbolSeparator;
+            var separator = exchangeApi.MarketSymbolSeparator;
             string[] symbols = new string[2];
 
             if (separator == "")

@@ -5,10 +5,10 @@ using ExchangeSharp;
 using Contracts;
 using System.Collections.Generic;
 
-using static DataStructures.Extensions;
 using static Helpers.Helpers;
 using static Helpers.SoundsProvider;
-using TraceMapper;
+using Contracts.Enums;
+using Contracts.DataStructures;
 
 namespace Triangulator.CoreComponents
 {

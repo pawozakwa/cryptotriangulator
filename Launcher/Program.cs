@@ -1,14 +1,13 @@
 ﻿using ExchangeProvider;
-using TraceMapper;
-using ExchangeSharp;
 using System;
 using System.Threading;
 using System.Diagnostics;
 
 using static Helpers.Helpers;
 using static Helpers.SoundsProvider;
-using Launcher;
 using Triangulator.CoreComponents;
+using Triangulator.Credits;
+using Contracts.Enums;
 
 namespace Triangulator
 {
