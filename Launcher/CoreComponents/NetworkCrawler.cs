@@ -9,6 +9,7 @@ using static Helpers.Helpers;
 using static Helpers.SoundsProvider;
 using Contracts.Enums;
 using Contracts.DataStructures;
+using System.Text;
 
 namespace Triangulator.CoreComponents
 {
@@ -167,39 +168,51 @@ namespace Triangulator.CoreComponents
 
                 if (BestChainProfit < 1m)
                 {
-                    var formattedReward = String.Format("{0:N6}", (double)BestChainProfit);
-                    PrintInColor($"Founded chain is not profitable yet, only {formattedReward}% left ...", ConsoleColor.DarkGray);
-                    WriteChainToConsole(bestCompleteChain);
+                    HandleNoProfitableTrace(bestCompleteChain);
                 }
                 else
                 {
-                    PrintInColor("$$$ Profitable path founded! $$$", ConsoleColor.Green);
-                    double rewardPercentage = ((double)BestChainProfit - 1) * 100.0;
-                    PrintInColor($"$$$ Profit size: {string.Format("{0:0.00}", rewardPercentage)}%       $$$", ConsoleColor.DarkGreen);
-
-                    var previousConsoleColor = Console.ForegroundColor;
-                    var result = $"==========BEST FOUNDED TRACE==========" +
-                                  Environment.NewLine + $"Result after: {BestChainProfit}";
-                    PrintInColor(result, ConsoleColor.Magenta);
-                    
-                    WriteChainToConsole(bestCompleteChain);
-
-                    //TODO: Calculate real reward for every potentially profitable trace
-
-                    var realReward = GetOptimizedReward(bestCompleteChain);
-
-                    if(realReward > 0)
-                    {
-                        PlayWinnerMusic();
-                        PrintInColor($"Real result: {realReward.ToString()}", ConsoleColor.Yellow);
-                    }
-
-
-                    var resultFoot = @"======================================" + Environment.NewLine;
-                    PrintInColor(resultFoot, ConsoleColor.Magenta);
+                    HandleProfitableTrace(bestCompleteChain);
                 }
             }
         }
+
+        private void HandleProfitableTrace(List<Edge> bestCompleteChain)
+        {
+            PrintInColor("$$$ Profitable path founded! $$$", ConsoleColor.Green);
+            double rewardPercentage = ((double)BestChainProfit - 1) * 100.0;
+            PrintInColor($"$$$ Profit size: {string.Format("{0:0.00}", rewardPercentage)}%       $$$", ConsoleColor.DarkGreen);
+
+            var result = $"==========BEST FOUNDED TRACE==========" +
+                          Environment.NewLine + $"Possible result after: {BestChainProfit}";
+            PrintInColor(result, ConsoleColor.Magenta);
+
+            WriteChainToConsole(bestCompleteChain);
+
+            //TODO: Calculate real reward for every potentially profitable trace
+
+            WriteChainToFile(result, bestCompleteChain);
+
+            var realReward = GetOptimizedReward(bestCompleteChain);
+
+            if (realReward > 0)
+            {
+                PlayWinnerMusic();
+                PrintInColor($"Real result: {realReward.ToString()}", ConsoleColor.Yellow);
+            }
+
+            var resultFoot = @"======================================" + Environment.NewLine;
+            PrintInColor(resultFoot, ConsoleColor.Magenta);
+            AddToFileOnDesktop(resultFoot);
+        }
+
+        private void HandleNoProfitableTrace(List<Edge> bestCompleteChain)
+        {
+            var formattedReward = String.Format("{0:N6}", (double)BestChainProfit);
+            PrintInColor($"Founded chain is not profitable yet, only {formattedReward}% left ...", ConsoleColor.DarkGray);
+            WriteChainToConsole(bestCompleteChain);
+        }
+
 
         private void WriteChainToConsole(List<Edge> chain)
         {
@@ -208,6 +221,18 @@ namespace Triangulator.CoreComponents
                 Console.Write($" > {edge.Head.Currency}");
             //Console.Write($" > {Constants.EnterCurrency} {Environment.NewLine}");
             Console.WriteLine();
+        }
+
+        private void WriteChainToFile(string result, List<Edge> chain)
+        {
+            var builder = new StringBuilder();
+            builder.Append(result);
+            builder.Append($"> {Constants.EnterCurrency}");
+
+            foreach (var edge in chain)
+                builder.Append($" > {edge.Head.Currency}");
+
+            AddToFileOnDesktop(builder.ToString());
         }
 
         private void CheckForNewBestGlobalProfit(List<Edge> edges, decimal arbitraryValue)
@@ -267,6 +292,8 @@ namespace Triangulator.CoreComponents
 
             SaveProfitToReportFileIfAny(chainToAnalyze, bestProfit, bestAmountToInvest);
 
+            WriteAllOrderBooksToFile(booksRecevingTasks);
+
             return bestProfit;
         }
 
@@ -291,6 +318,10 @@ namespace Triangulator.CoreComponents
                 });
 
                 AddToFileOnDesktop(report.ToArray());
+            }
+            else
+            {
+                AddToFileOnDesktop("BAAAD! There is no amount to invest with real profit...");
             }
         }
 
@@ -335,7 +366,7 @@ namespace Triangulator.CoreComponents
                 FillProfitDictionary(getBooksTasks, ref profitDictionary, p1, limit, minimalStep, depth);
         }
 
-        private decimal GetExactCurrentReward(List<Task<ExchangeOrderBook>> booksRecevingTasks, decimal initialAmount = 0.01m )
+        private decimal GetExactCurrentReward(List<Task<ExchangeOrderBook>> booksRecevingTasks, decimal initialAmount = 0.1m )
         {
             decimal[] intermediateAmounts = new decimal[_chainToOptimize.Count + 1];
             intermediateAmounts[0] = initialAmount;
@@ -346,7 +377,6 @@ namespace Triangulator.CoreComponents
             {
                 edge = _chainToOptimize[i];
                 var orderBook = booksRecevingTasks[i].Result;
-                //TODO: Order should be getted async at the begging, not in each loop
 
                 //TODO: First iteration should update initial amount
 
@@ -397,6 +427,16 @@ namespace Triangulator.CoreComponents
             //return percentLeft;
 
             return intermediateAmounts[intermediateAmounts.Length - 1];
+        }
+
+        private void WriteAllOrderBooksToFile(List<Task<ExchangeOrderBook>> tasksForOrders)
+        {
+            Task.WaitAll(tasksForOrders.ToArray());
+
+            foreach (var task in tasksForOrders)
+            {
+                AddToFileOnDesktop(task.Result.ToString());
+            }
         }
 
         #endregion

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ExchangeSharp;
-using Contracts;
 using System.IO;
 
 using static Helpers.Helpers;
