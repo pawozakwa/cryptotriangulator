@@ -28,6 +28,8 @@ namespace Helpers
         private static string DesktopPath => Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         private static string LogFileName = "Triangulation results.txt";
         private static string LogFilePath => Path.Combine(DesktopPath, LogFileName);
+        private static string ProfitFilePath => Path.Combine(DesktopPath, "Profits.txt");
+
 
         public static void AddToFileOnDesktop(params string[] texts)
         {
@@ -35,5 +37,13 @@ namespace Helpers
                 foreach (var text in texts)
                     sw.WriteLineAsync(text);
         }
+
+        public static void AddToProfitFileOnDesktop(string text)
+        {
+            using (var sw = File.AppendText(ProfitFilePath))
+                sw.WriteLineAsync(text);
+        }
+
+
     }
 }

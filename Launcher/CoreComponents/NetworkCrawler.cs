@@ -199,6 +199,7 @@ namespace Triangulator.CoreComponents
             {
                 PlayWinnerMusic();
                 PrintInColor($"Real result: {realReward.ToString()}", ConsoleColor.Yellow);
+                AddToProfitFileOnDesktop(realReward.ToString());
             }
 
             var resultFoot = @"======================================" + Environment.NewLine;
@@ -272,7 +273,7 @@ namespace Triangulator.CoreComponents
 
         private List<Edge> _chainToOptimize;
 
-        public decimal GetOptimizedReward(List<Edge> chainToAnalyze, decimal maxAmountToInvest = 0.01m)
+        public decimal GetOptimizedReward(List<Edge> chainToAnalyze, decimal maxAmountToInvest = 0.1m)
         {
             _chainToOptimize = chainToAnalyze;
 
