@@ -6,6 +6,7 @@ using System.IO;
 using static Helpers.Helpers;
 using Contracts.DataStructures;
 using Contracts.Enums;
+using Contracts;
 
 namespace Triangulator.CoreComponents
 {

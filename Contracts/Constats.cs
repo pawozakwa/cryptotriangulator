@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Contracts.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Contracts.Enums
+namespace Contracts
 {
     public class Constants
     {
@@ -21,5 +22,7 @@ namespace Contracts.Enums
         public const bool LiveProgressBar = false;
 
         public const bool SaveWhatIsUnparsableToFile = false;
+
+        public const int PlaceOrderRetries = 3;
     }
 }
