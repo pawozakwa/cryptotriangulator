@@ -1,4 +1,6 @@
-﻿using ExchangeSharp;
+﻿using Contracts;
+using Contracts.DataStructures;
+using ExchangeSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,11 +12,38 @@ namespace Triangulator
     {
         private ExchangeAPI _exchangeApi;
 
-        public async Task PlaceOrdersChain(decimal initialAmount, IEnumerable<ExchangeOrderRequest> exchanges)
+        public async Task PlaceOrdersChain(decimal initialAmount, IEnumerable<Edge> edges)
         {
-            foreach (var exchange in exchanges)
+            var firstTradeInChain = true;
+            Vertice previousVertice = null;
+            foreach (var edge in edges)
             {
-                await TryToPlaceOrder(exchange);
+                decimal amount;
+                var amountsDictionary = _exchangeApi.GetAmountsAsync();
+                if (firstTradeInChain)
+                {
+                    amount = (await amountsDictionary)[Constants.ArbitraryCurrency.ToString()];
+                }
+                else
+                {
+                    var currencyToGetAmount = edge.Inverted ?
+                            previousVertice.Currency.ToString() :
+                            edge.Head.Currency.ToString();
+
+                    amount = (await amountsDictionary)[Constants.ArbitraryCurrency.ToString()];
+                }
+                firstTradeInChain = false;
+                previousVertice = edge.Head;
+
+                var request = new ExchangeOrderRequest()
+                {
+                    Amount = amount,
+                    IsBuy = !edge.Inverted,
+                    MarketSymbol = edge.TickerName,
+                    Price = edge.Inverted ? edge.Ticker.Bid : edge.Ticker.Ask
+                };
+
+                await TryToPlaceOrder(request);
             }
         }
 
