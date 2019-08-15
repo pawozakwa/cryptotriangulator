@@ -19,14 +19,12 @@ namespace Triangulator
 
             CustomizeConsole();
             Demo.ShowLogo();
-
-            PrintInColor("Creating api provider", color: ConsoleColor.Cyan);
+                        
             var apiProvider = new ExchangeApiProvider();
-            PrintInColor("Creating network crawler", color: ConsoleColor.Cyan);
-
             var network = new CurrencyNetwork();
             var api = apiProvider.GetApi(Exchange.Binance);
-            var crawler = new NetworkCrawler(api, network);
+            var trader = new Trader(api);            
+            var crawler = new NetworkCrawler(api, network, trader);
 
             var accountBalance = 1m;
 

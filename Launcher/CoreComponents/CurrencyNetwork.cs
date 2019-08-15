@@ -19,6 +19,7 @@ namespace Triangulator.CoreComponents
 
         public CurrencyNetwork()
         {
+            PrintInColor("Creating api provider", color: ConsoleColor.Cyan);
             Edges = new List<Edge>();
             VerticesDictionary = new Dictionary<Currency, Vertice>();
             ForwardEdgesDictionary = new Dictionary<string, Edge>();

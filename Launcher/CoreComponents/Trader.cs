@@ -12,6 +12,14 @@ namespace Triangulator
     {
         private ExchangeAPI _exchangeApi;
 
+        const string keysFileName = "keys.bin";
+
+        public Trader(ExchangeAPI api)
+        {
+            _exchangeApi = api;
+            _exchangeApi.LoadAPIKeys(keysFileName);
+        }
+
         public async Task PlaceOrdersChain(decimal initialAmount, IEnumerable<Edge> edges)
         {
             var firstTradeInChain = true;

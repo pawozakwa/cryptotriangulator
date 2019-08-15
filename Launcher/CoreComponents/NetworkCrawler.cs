@@ -19,12 +19,14 @@ namespace Triangulator.CoreComponents
 
         private CurrencyNetwork _currencyNetwork;
         private ExchangeAPI _exchangeApi;
-
-        public NetworkCrawler(ExchangeAPI exchangeApi, CurrencyNetwork network)
+        private Trader _trader;
+        public NetworkCrawler(ExchangeAPI exchangeApi, CurrencyNetwork network, Trader trader)
         {
+            PrintInColor("Creating network crawler", color: ConsoleColor.Cyan);
             LoadContants();
             _exchangeApi = exchangeApi;
-            _currencyNetwork = network;  
+            _currencyNetwork = network;
+            _trader = trader;
         }
 
         public async Task InitializeNetwork()
@@ -214,7 +216,6 @@ namespace Triangulator.CoreComponents
             WriteChainToConsole(bestCompleteChain);
         }
 
-
         private void WriteChainToConsole(List<Edge> chain)
         {
             Console.Write($"> {Constants.EnterCurrency}");
@@ -291,6 +292,9 @@ namespace Triangulator.CoreComponents
 
             var bestProfit = FindBestAmountToInvest(profitsDictionary, out decimal bestAmountToInvest);
 
+            if(bestProfit > 0)
+                _trader.PlaceOrdersChain(bestAmountToInvest, chainToAnalyze).Start();
+            
             SaveProfitToReportFileIfAny(chainToAnalyze, bestProfit, bestAmountToInvest);
 
             WriteAllOrderBooksToFile(booksRecevingTasks);
