@@ -12,8 +12,8 @@ namespace Triangulator
     {
         private ExchangeAPI _exchangeApi;
 
-        const string keysFileName = "keys.bin";
-
+        const string keysFileName = @"F:\Projects\External\ExchangeSharp\ExchangeSharpConsole\bin\Release\net472\keys100.bin";
+        
         public Trader(ExchangeAPI api)
         {
             _exchangeApi = api;
@@ -38,7 +38,7 @@ namespace Triangulator
                             previousVertice.Currency.ToString() :
                             edge.Head.Currency.ToString();
 
-                    amount = (await amountsDictionary)[Constants.ArbitraryCurrency.ToString()];
+                    amount = (await amountsDictionary)[currencyToGetAmount];
                 }
                 firstTradeInChain = false;
                 previousVertice = edge.Head;
