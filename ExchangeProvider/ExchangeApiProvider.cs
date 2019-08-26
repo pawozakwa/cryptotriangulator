@@ -15,7 +15,7 @@ namespace ExchangeProvider
             Console.Write("Initialization of apis...");
             Apis = new Dictionary<Exchange, ExchangeAPI>()
             {
-                { Exchange.Abucoins, new ExchangeAbucoinsAPI() },
+                { Exchange.Abucoins,  new ExchangeAbucoinsAPI() },
                 { Exchange.Binance, new ExchangeBinanceAPI() },
                 { Exchange.Bitfinex, new ExchangeBitfinexAPI() },
                 { Exchange.Bithumb, new ExchangeBithumbAPI() },

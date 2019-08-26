@@ -44,8 +44,8 @@ namespace Triangulator.CoreComponents
             var tickersFromExchange = _exchangeApi.GetTickersAsync();
             stopWatch.Stop();
             Console.WriteLine($"   <= Done!");
-            Console.Write("Feeding Network with actual tickers...");
-            stopWatch.Restart();
+            Console.WriteLine($"Feeding Network with tickers from {_exchangeApi.BaseUrl}");
+            
             foreach (var tickerKV in await tickersFromExchange)
             {
                 if (tickerKV.Value.Ask == 0 || tickerKV.Value.Bid == 0 || tickerKV.Value.Last == 0)
@@ -61,6 +61,10 @@ namespace Triangulator.CoreComponents
                     throw;
                 }
             }
+
+            Console.WriteLine($"took {stopWatch.ElapsedMilliseconds} ms.");
+            stopWatch.Restart();
+
             Console.WriteLine($"   <= Done!");
         }
 
@@ -195,7 +199,9 @@ namespace Triangulator.CoreComponents
 
             WriteChainToFile(result, bestCompleteChain);
 
-            var realReward = GetOptimizedReward(bestCompleteChain);
+            
+
+            var realReward = GetOptimizedReward(bestCompleteChain, _trader.ArbitraryAmount().GetAwaiter().GetResult());
 
             if (realReward > 0)
             {
@@ -293,13 +299,26 @@ namespace Triangulator.CoreComponents
             var bestProfit = FindBestAmountToInvest(profitsDictionary, out decimal bestAmountToInvest);
 
             if(bestProfit > 0)
-                _trader.PlaceOrdersChain(bestAmountToInvest, chainToAnalyze).Start();
-            
+                TryToPlaceChainOfOrders(chainToAnalyze, bestAmountToInvest);
+
             SaveProfitToReportFileIfAny(chainToAnalyze, bestProfit, bestAmountToInvest);
 
             WriteAllOrderBooksToFile(booksRecevingTasks);
 
             return bestProfit;
+        }
+
+        private void TryToPlaceChainOfOrders(List<Edge> chainToAnalyze, decimal bestAmountToInvest)
+        {
+            try
+            {
+                _trader.PlaceOrdersChain(bestAmountToInvest, chainToAnalyze).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                PrintInColor(e.Message, ConsoleColor.Red);
+                throw;
+            }
         }
 
         private static void SaveProfitToReportFileIfAny(List<Edge> chainToAnalyze, decimal bestProfit, decimal bestAmountToInvest)

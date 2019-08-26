@@ -8,6 +8,7 @@ using static Helpers.SoundsProvider;
 using Triangulator.CoreComponents;
 using Triangulator.Credits;
 using Contracts.Enums;
+using ExchangeSharp;
 
 namespace Triangulator
 {
@@ -20,13 +21,12 @@ namespace Triangulator
             CustomizeConsole();
             Demo.ShowLogo();
                         
-            var apiProvider = new ExchangeApiProvider();
             var network = new CurrencyNetwork();
-            var api = apiProvider.GetApi(Exchange.Binance);
+            var api = new ExchangeBinanceAPI();   //apiProvider.GetApi(Exchange.Bleutrade);
             var trader = new Trader(api);            
             var crawler = new NetworkCrawler(api, network, trader);
 
-            var accountBalance = 1m;
+            var accountBalance = 1.0m;// trader.GetArbitraryAmount().GetAwaiter().GetResult();
 
             var simulationLenght = 2000000;
 
@@ -50,6 +50,7 @@ namespace Triangulator
                 Console.WriteLine();
 
                 var delay = Math.Max((1500 - (int)cycleTimer.ElapsedMilliseconds), 0);
+                Console.WriteLine($"Wait for {delay} ms.");
                 Thread.Sleep(delay); // Avoid ticker get rejection
             }
 

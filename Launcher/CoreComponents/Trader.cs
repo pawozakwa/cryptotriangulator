@@ -13,11 +13,16 @@ namespace Triangulator
         private ExchangeAPI _exchangeApi;
 
         const string keysFileName = @"F:\Projects\External\ExchangeSharp\ExchangeSharpConsole\bin\Release\net472\keys100.bin";
-        
+
+        private Task<decimal> _getAmount;
+
         public Trader(ExchangeAPI api)
         {
+            PrintInColor("Creating network Trader", color: ConsoleColor.Cyan);
             _exchangeApi = api;
             _exchangeApi.LoadAPIKeys(keysFileName);
+
+            _getAmount = GetArbitraryAmount();
         }
 
         public async Task PlaceOrdersChain(decimal initialAmount, IEnumerable<Edge> edges)
@@ -60,7 +65,7 @@ namespace Triangulator
             try
             {
                 var result = await PlaceOrder(orderRequest);
-                var messageColor = result.Result == ExchangeAPIOrderResult.Filled ? ConsoleColor.Green :ConsoleColor.Red;
+                var messageColor = result.Result == ExchangeAPIOrderResult.Filled ? ConsoleColor.Green : ConsoleColor.Red;
                 PrintInColor(result.Message, messageColor);
             }
             catch (Exception e)
@@ -73,6 +78,19 @@ namespace Triangulator
         public async Task<ExchangeOrderResult> PlaceOrder(ExchangeOrderRequest orderRequest)
         {
             return await _exchangeApi.PlaceOrderAsync(orderRequest);
+        }
+
+        private async Task<decimal> GetArbitraryAmount()
+        {
+            var amountsDictionary = await _exchangeApi.GetAmountsAsync();
+            return amountsDictionary[Constants.ArbitraryCurrency.ToString()];
+        }
+
+        public async Task<decimal> ArbitraryAmount()
+        { 
+            var result = await _getAmount;
+            _getAmount = GetArbitraryAmount();
+            return result;
         }
     }
 }

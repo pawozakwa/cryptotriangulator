@@ -15,7 +15,7 @@ namespace Contracts
 
         public const int SearchDepth = 5;
 
-        public const decimal Commision = 0.1m / 100m;
+        public const decimal Commision = 0.075m / 100m;
 
         //Tweaks
 
