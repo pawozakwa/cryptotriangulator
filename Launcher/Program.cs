@@ -1,14 +1,11 @@
-﻿using ExchangeProvider;
+﻿using ExchangeSharp;
 using System;
-using System.Threading;
 using System.Diagnostics;
-
-using static Helpers.Helpers;
-using static Helpers.SoundsProvider;
+using System.Threading;
+using Tests;
 using Triangulator.CoreComponents;
 using Triangulator.Credits;
-using Contracts.Enums;
-using ExchangeSharp;
+using static Helpers.Helpers;
 
 namespace Triangulator
 {
@@ -20,16 +17,26 @@ namespace Triangulator
 
             CustomizeConsole();
             Demo.ShowLogo();
-                        
+
             var network = new CurrencyNetwork();
             var api = new ExchangeBinanceAPI();   //apiProvider.GetApi(Exchange.Bleutrade);
-            var trader = new Trader(api);            
+            FixBinanceApi(ref api);
+
+
+            var trader = new Trader(api);
             var crawler = new NetworkCrawler(api, network, trader);
 
             var accountBalance = 1.0m;// trader.GetArbitraryAmount().GetAwaiter().GetResult();
 
             var simulationLenght = 2000000;
 
+            MainTriangulatorLoop(crawler, accountBalance, simulationLenght);
+
+            Console.ReadLine();
+        }
+
+        private static void MainTriangulatorLoop(NetworkCrawler crawler, decimal accountBalance, int simulationLenght)
+        {
             var cycleTimer = new Stopwatch();
 
             for (int i = 0; i < simulationLenght; i++)
@@ -53,8 +60,6 @@ namespace Triangulator
                 Console.WriteLine($"Wait for {delay} ms.");
                 Thread.Sleep(delay); // Avoid ticker get rejection
             }
-
-            Console.ReadLine();
         }
 
         private static void SaveStartTimeToReportFile()
@@ -119,6 +124,11 @@ namespace Triangulator
                 catch (Exception e)
                 { PrintInColor(e.ToString(), ConsoleColor.Red); }
             }
+        }
+
+        private static void FixBinanceApi(ref ExchangeBinanceAPI api)
+        {
+            api.RequestWindow = TimeSpan.FromSeconds(59);
         }
     }
 }

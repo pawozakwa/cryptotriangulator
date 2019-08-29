@@ -172,6 +172,8 @@ namespace Triangulator.CoreComponents
 
                 var bestCompleteChain = _bestChain.GetCompleteChain();
 
+                _trader.PlaceOrdersChain(0.0001m, bestCompleteChain).GetAwaiter().GetResult();
+
                 if (BestChainProfit < 1m)
                 {
                     HandleNoProfitableTrace(bestCompleteChain);
@@ -199,7 +201,6 @@ namespace Triangulator.CoreComponents
 
             WriteChainToFile(result, bestCompleteChain);
 
-            
 
             var realReward = GetOptimizedReward(bestCompleteChain, _trader.ArbitraryAmount().GetAwaiter().GetResult());
 
@@ -403,10 +404,7 @@ namespace Triangulator.CoreComponents
                 var orderBook = booksRecevingTasks[i].Result;
 
                 //TODO: First iteration should update initial amount
-
-                // HOW TO CALCULATE HOW MUCH BTC WE NEED TO SPENT TO GET MAX PROFIT?
-                // !BINARY SEARCH!
-
+                
                 if (!edge.Inverted)
                 {
                     foreach (var order in orderBook.Asks.Values)
