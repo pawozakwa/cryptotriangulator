@@ -33,27 +33,35 @@ namespace Triangulator
             {
                 decimal amount;
                 var amountsDictionary = _exchangeApi.GetAmountsAsync();
+
+                var currencyToGetAmount = "";
+
                 if (firstTradeInChain)
                 {
-                    amount = (await amountsDictionary)[Constants.ArbitraryCurrency.ToString()];
+                    currencyToGetAmount = edge.Inverted ?
+                            Constants.ArbitraryCurrency.ToString() :
+                            edge.Head.Currency.ToString();                
                 }
                 else
                 {
-                    var currencyToGetAmount = edge.Inverted ?
+                    currencyToGetAmount = edge.Inverted ?
                             previousVertice.Currency.ToString() :
                             edge.Head.Currency.ToString();
-
-                    amount = (await amountsDictionary)[currencyToGetAmount];
                 }
+                    amount = (await amountsDictionary)[currencyToGetAmount];
+                
+
                 firstTradeInChain = false;
                 previousVertice = edge.Head;
 
+                var price = edge.Inverted ? edge.Ticker.Bid : edge.Ticker.Ask;
+                
                 var request = new ExchangeOrderRequest()
                 {
                     Amount = amount,
                     IsBuy = !edge.Inverted,
                     MarketSymbol = edge.TickerName,
-                    Price = edge.Inverted ? edge.Ticker.Bid : edge.Ticker.Ask
+                    Price = price
                 };
 
                 await TryToPlaceOrder(request);
