@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using Tests;
 using Triangulator.CoreComponents;
 using Triangulator.Credits;
 using static Helpers.Helpers;

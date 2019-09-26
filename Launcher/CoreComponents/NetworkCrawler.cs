@@ -41,12 +41,14 @@ namespace Triangulator.CoreComponents
 
             Console.Write("Downloading actual tickers...");
             stopWatch.Start();
-            var tickersFromExchange = _exchangeApi.GetTickersAsync();
+            var tickersFromExchangeTask = _exchangeApi.GetTickersAsync();
             stopWatch.Stop();
+
+            var tickersFromExchange = await tickersFromExchangeTask;
             Console.WriteLine($"   <= Done!");
             Console.WriteLine($"Feeding Network with tickers from {_exchangeApi.BaseUrl}");
-            
-            foreach (var tickerKV in await tickersFromExchange)
+
+            foreach (var tickerKV in tickersFromExchange)
             {
                 if (tickerKV.Value.Ask == 0 || tickerKV.Value.Bid == 0 || tickerKV.Value.Last == 0)
                     continue;
@@ -172,7 +174,8 @@ namespace Triangulator.CoreComponents
 
                 var bestCompleteChain = _bestChain.GetCompleteChain();
 
-                _trader.PlaceOrdersChain(0.0001m, bestCompleteChain).GetAwaiter().GetResult();
+                //TODO This is totally test method
+                //_trader.PlaceOrdersChain(0.0001m, bestCompleteChain).GetAwaiter().GetResult();
 
                 if (BestChainProfit < 1m)
                 {
@@ -201,7 +204,6 @@ namespace Triangulator.CoreComponents
 
             WriteChainToFile(result, bestCompleteChain);
 
-
             var realReward = GetOptimizedReward(bestCompleteChain, _trader.ArbitraryAmount().GetAwaiter().GetResult());
 
             if (realReward > 0)
@@ -218,7 +220,7 @@ namespace Triangulator.CoreComponents
 
         private void HandleNoProfitableTrace(List<Edge> bestCompleteChain)
         {
-            var formattedReward = String.Format("{0:N6}", (double)BestChainProfit);
+            var formattedReward = string.Format("{0:N6}", (double)BestChainProfit);
             PrintInColor($"Founded chain is not profitable yet, only {formattedReward}% left ...", ConsoleColor.DarkGray);
             WriteChainToConsole(bestCompleteChain);
         }

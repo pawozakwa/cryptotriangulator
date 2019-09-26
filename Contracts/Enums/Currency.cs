@@ -371,7 +371,6 @@ namespace Contracts.Enums
         CLOU,
         GNX,
         CHS,
-        BBTC,
         BETH,
         DAY,
         NEU,
