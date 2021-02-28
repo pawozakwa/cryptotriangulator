@@ -9,5 +9,6 @@ namespace Contracts.Enums
         USD,
         EUR,
         JPY,
+        GBP,
     }
 }
